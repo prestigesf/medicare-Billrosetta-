@@ -7,11 +7,11 @@
       "pluggy": "1.6.0",
       "pytest": "9.1.1"
     },
-    "git_commit": "53f275fa4bf6accdeda94ad86745604ac8a44aa8",
+    "git_commit": "ddd6f39e816e42ea8fc1cef5c3921e1322cad45e",
     "overall_status": "PASS",
     "phase": "1",
     "raw_output_file": "evidence/phase1_raw_test_output.txt",
-    "raw_output_sha256": "9aeb9dab0497a2bf4c2d106f2cfce899044142206a6fc765152af46162bcc959",
+    "raw_output_sha256": "f611e04613990e5918c467c8684ee0999251d628008a43cf7c2eeb3158e3ea79",
     "runtime": {
       "implementation": "CPython",
       "platform": "Linux-6.18.5-fc-v20-x86_64-with-glibc2.39",
@@ -28,7 +28,8 @@
       "tests/test_engine.py": "38212cfa0ef86ec433b586ac457e403300bd6b4551891d72bcf47b407015d8f5",
       "tests/test_formula.py": "83f9ea4b01460e14d327462a25ac672d1a5a4f85622b1abe5bd8b73e19611a85",
       "tests/test_invariants.py": "b061db41808badb93e61fd60cc551a2b66db00b5c20581c0fdffe8e7475a7956",
-      "tools/make_evidence.py": "d09dcacb44967bc4d1da476729afe5b54760ed390a7f82ac001989285500e2a6"
+      "tools/make_evidence.py": "d09dcacb44967bc4d1da476729afe5b54760ed390a7f82ac001989285500e2a6",
+      "tools/phase_diff.py": "75f3266f3354d080b187e7364433ed294893580031a655601eee635224b39981"
     },
     "test_command": "python -m pytest -v -W error",
     "test_counts": {
@@ -38,7 +39,7 @@
       "skipped": "0"
     },
     "test_exit_code": "0",
-    "timestamp_utc": "20260811T190809Z"
+    "timestamp_utc": "20260811T191711Z"
   },
-  "payload_sha256": "3f8828912f495f7ec313e2fe59937338fd4dd340cf667d8f4b785d19febe746e"
+  "payload_sha256": "88c9ec4b55a52479bd9b1e2df4093c8c9daa1172401cee36e954b47e58338a6d"
 }

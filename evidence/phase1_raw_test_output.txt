@@ -50,4 +50,4 @@ tests/test_invariants.py::test_only_structural_integers_in_engine_source[formula
 tests/test_invariants.py::test_only_structural_integers_in_engine_source[models.py] PASSED [ 97%]
 tests/test_invariants.py::test_the_check_would_actually_catch_a_hardcoded_rate PASSED [100%]
 
-============================== 43 passed in 0.07s ==============================
+============================== 43 passed in 0.08s ==============================
