@@ -1,9 +1,8 @@
 # Build protocol
 
-Adapted from the DeadlineSF phase protocol. The reason it applies here is the
-same reason it applied there: the output is a number someone relies on in a
-quasi-legal document, so a claim about the system is worth nothing without an
-artifact behind it.
+The output of this package is a number someone relies on in a quasi-legal
+document. A claim about the system is worth nothing without an artifact behind
+it, so each phase produces evidence rather than a report.
 
 ## Invariants
 
@@ -17,8 +16,8 @@ artifact behind it.
    editing this package.
 3. **Never weaken a test to make it pass.** Find the real defect.
 4. **No invented rate, ever.** Every failure raises a specific
-   `RateUnavailable` subclass naming its reason. There is no default rate,
-   no fallback amount, and no zero-instead-of-refusal.
+   `RateUnavailable` subclass naming its reason. There is no default rate, no
+   fallback amount, and no zero-instead-of-refusal.
 5. **A rate is reproducible.** `(cpt_code, locality, setting, date_of_service)`
    against a given schedule version always yields the same amount, and the
    result carries its own derivation.
@@ -42,16 +41,10 @@ artifact behind it.
 7. STOP       report and await approval. Do NOT begin the next phase.
 ```
 
-### Difference from the DeadlineSF protocol
-
-That build had no git, so it froze a `baseline_code_post_phaseN.txt` and ran
-`phase_diff.py` to detect drift. Here git does that job, so the frozen baseline
-and differ are dropped.
-
-What git does *not* provide is proof that a test run happened and what it
-produced — so the self-hashed evidence artifact and the read-back verify stay.
-`git_commit` is recorded in every artifact, which ties the evidence to an exact
-tree.
+Git handles drift detection, so there is no separately frozen code baseline.
+What git does not provide is proof that a test run happened and what it
+produced — hence the evidence artifact and the read-back verify. Every
+artifact records `git_commit`, tying the evidence to an exact tree.
 
 Evidence files are excluded from the hashed source set, so generated artifacts
 never register as source drift.
@@ -63,7 +56,7 @@ never register as source drift.
 | 1 | Calculation, lookup, refusal paths, invariant enforcement | **Complete** — 43 tests, artifact verified |
 | 2 | CMS loaders: PPRRVU, GPCI, ZIP-to-locality crosswalk | Blocked: needs the three files |
 | 3 | Bulk input/output: CSV in, priced results with derivation out | — |
-| 4 | Swap `MOCK_CPT_DB` in BillRosetta for this engine | — |
+| 4 | Integrate the engine into the bill-decoding application | — |
 | 5 | OPPS pricing for hospital facility charges | Conditional — only if it proves to be the blocker |
 
 ## Phase 1 result
@@ -75,5 +68,4 @@ never register as source drift.
 - 11 source files hashed
 
 Loaders are deliberately unwritten. Writing a parser against a guessed file
-layout is how you get code that looks finished and is not — which is exactly
-what `parse_rate` in the Bright Data client already did.
+layout produces code that looks finished and is not.
