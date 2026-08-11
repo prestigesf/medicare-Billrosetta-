@@ -1,0 +1,53 @@
+============================= test session starts ==============================
+platform linux -- Python 3.11.15, pytest-9.1.1, pluggy-1.6.0 -- /workspace/medicare-rates/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: /workspace/medicare-rates
+configfile: pyproject.toml
+testpaths: tests
+collecting ... collected 43 items
+
+tests/test_engine.py::test_date_of_service_selects_the_schedule_in_effect_then PASSED [  2%]
+tests/test_engine.py::test_period_boundaries_are_inclusive PASSED        [  4%]
+tests/test_engine.py::test_date_outside_every_loaded_period_raises PASSED [  6%]
+tests/test_engine.py::test_overlapping_periods_are_rejected_at_construction PASSED [  9%]
+tests/test_engine.py::test_locality_changes_the_amount PASSED            [ 11%]
+tests/test_engine.py::test_zip_plus_four_is_normalised PASSED            [ 13%]
+tests/test_engine.py::test_unmapped_zip_raises_rather_than_defaulting PASSED [ 16%]
+tests/test_engine.py::test_unknown_cpt_raises_rather_than_defaulting PASSED [ 18%]
+tests/test_engine.py::test_locality_without_gpci_data_raises PASSED      [ 20%]
+tests/test_engine.py::test_bundled_code_raises_with_its_status_explained PASSED [ 23%]
+tests/test_engine.py::test_result_carries_its_own_derivation PASSED      [ 25%]
+tests/test_engine.py::test_setting_is_recorded_on_the_result PASSED      [ 27%]
+tests/test_formula.py::test_national_non_facility_matches_hand_calculation PASSED [ 30%]
+tests/test_formula.py::test_national_facility_uses_the_facility_pe_rvu PASSED [ 32%]
+tests/test_formula.py::test_facility_and_non_facility_differ PASSED      [ 34%]
+tests/test_formula.py::test_each_rvu_is_adjusted_by_its_own_gpci PASSED  [ 37%]
+tests/test_formula.py::test_swapping_two_gpcis_changes_the_answer PASSED [ 39%]
+tests/test_formula.py::test_conversion_factor_scales_the_result PASSED   [ 41%]
+tests/test_formula.py::test_non_priceable_status_code_raises_rather_than_returning_zero PASSED [ 44%]
+tests/test_formula.py::test_carrier_priced_code_raises PASSED            [ 46%]
+tests/test_formula.py::test_missing_pe_rvu_for_setting_raises_rather_than_substituting PASSED [ 48%]
+tests/test_formula.py::test_money_rounds_half_up[110.504-110.5] PASSED   [ 51%]
+tests/test_formula.py::test_money_rounds_half_up[110.505-110.51] PASSED  [ 53%]
+tests/test_formula.py::test_money_rounds_half_up[110.515-110.52] PASSED  [ 55%]
+tests/test_formula.py::test_money_rounds_half_up[0.005-0.01] PASSED      [ 58%]
+tests/test_formula.py::test_money_rounds_half_up[125.0-125.0] PASSED     [ 60%]
+tests/test_formula.py::test_rounding_happens_once_at_the_end PASSED      [ 62%]
+tests/test_invariants.py::test_no_float_literals_in_engine_source[__init__.py] PASSED [ 65%]
+tests/test_invariants.py::test_no_float_literals_in_engine_source[engine.py] PASSED [ 67%]
+tests/test_invariants.py::test_no_float_literals_in_engine_source[errors.py] PASSED [ 69%]
+tests/test_invariants.py::test_no_float_literals_in_engine_source[formula.py] PASSED [ 72%]
+tests/test_invariants.py::test_no_float_literals_in_engine_source[models.py] PASSED [ 74%]
+tests/test_invariants.py::test_no_cpt_shaped_integers_in_engine_source[__init__.py] PASSED [ 76%]
+tests/test_invariants.py::test_no_cpt_shaped_integers_in_engine_source[engine.py] PASSED [ 79%]
+tests/test_invariants.py::test_no_cpt_shaped_integers_in_engine_source[errors.py] PASSED [ 81%]
+tests/test_invariants.py::test_no_cpt_shaped_integers_in_engine_source[formula.py] PASSED [ 83%]
+tests/test_invariants.py::test_no_cpt_shaped_integers_in_engine_source[models.py] PASSED [ 86%]
+tests/test_invariants.py::test_only_structural_integers_in_engine_source[__init__.py] PASSED [ 88%]
+tests/test_invariants.py::test_only_structural_integers_in_engine_source[engine.py] PASSED [ 90%]
+tests/test_invariants.py::test_only_structural_integers_in_engine_source[errors.py] PASSED [ 93%]
+tests/test_invariants.py::test_only_structural_integers_in_engine_source[formula.py] PASSED [ 95%]
+tests/test_invariants.py::test_only_structural_integers_in_engine_source[models.py] PASSED [ 97%]
+tests/test_invariants.py::test_the_check_would_actually_catch_a_hardcoded_rate PASSED [100%]
+
+============================== 43 passed in 0.07s ==============================

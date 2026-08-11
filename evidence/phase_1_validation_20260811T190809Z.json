@@ -1,0 +1,44 @@
+{
+  "payload": {
+    "dependencies": {
+      "Pygments": "2.20.0",
+      "iniconfig": "2.3.0",
+      "packaging": "26.3",
+      "pluggy": "1.6.0",
+      "pytest": "9.1.1"
+    },
+    "git_commit": "53f275fa4bf6accdeda94ad86745604ac8a44aa8",
+    "overall_status": "PASS",
+    "phase": "1",
+    "raw_output_file": "evidence/phase1_raw_test_output.txt",
+    "raw_output_sha256": "9aeb9dab0497a2bf4c2d106f2cfce899044142206a6fc765152af46162bcc959",
+    "runtime": {
+      "implementation": "CPython",
+      "platform": "Linux-6.18.5-fc-v20-x86_64-with-glibc2.39",
+      "python": "3.11.15"
+    },
+    "source_file_sha256": {
+      "README.md": "4bae6f105ac06d52feaf28202f84c6c6f8544fc2bed0120321ad43b17d14b8cf",
+      "pfs/__init__.py": "77e6da02c637778e3a2b422620505772aa866cefdaa6192895ad28f1fb4c60be",
+      "pfs/engine.py": "37336016c20d9b1fe1983077df6133a3c80e7a093044162eb12561dc80e6fd68",
+      "pfs/errors.py": "e6e6c526fd6aa3f83f533f67cc2cc38224247469080cf7143981c9fe807259eb",
+      "pfs/formula.py": "90a1f8dd8715751ade4dcc41b8695774f25e5b7c20c24936c2d46924a5a4ff43",
+      "pfs/models.py": "62e21127b52fc7deb3167043e9b70a5449a86663bc506b483f29691e33a13fc6",
+      "pyproject.toml": "e6b96a222f96b8c5ba4d1c22d5be96dd3753e60979c84dbd691aa3b3160db604",
+      "tests/test_engine.py": "38212cfa0ef86ec433b586ac457e403300bd6b4551891d72bcf47b407015d8f5",
+      "tests/test_formula.py": "83f9ea4b01460e14d327462a25ac672d1a5a4f85622b1abe5bd8b73e19611a85",
+      "tests/test_invariants.py": "b061db41808badb93e61fd60cc551a2b66db00b5c20581c0fdffe8e7475a7956",
+      "tools/make_evidence.py": "d09dcacb44967bc4d1da476729afe5b54760ed390a7f82ac001989285500e2a6"
+    },
+    "test_command": "python -m pytest -v -W error",
+    "test_counts": {
+      "error": "0",
+      "failed": "0",
+      "passed": "43",
+      "skipped": "0"
+    },
+    "test_exit_code": "0",
+    "timestamp_utc": "20260811T190809Z"
+  },
+  "payload_sha256": "3f8828912f495f7ec313e2fe59937338fd4dd340cf667d8f4b785d19febe746e"
+}
