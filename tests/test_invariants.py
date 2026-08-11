@@ -39,13 +39,36 @@ def strip_docstrings(tree: ast.AST) -> ast.AST:
     return tree
 
 
-def numeric_literals(path: Path):
-    """Every executable numeric literal in a source file, with line numbers."""
+def numeric_literals(path: Path, *, skip_named_constants: bool = False):
+    """Every executable numeric literal in a source file, with line numbers.
+
+    With skip_named_constants, literals assigned to a module-level UPPER_CASE
+    name are excluded. A named constant is explained by its name; an inline
+    number is not. This does not open a hole in invariant 2 — a rate is a
+    float and a CPT code is a 5-digit int, and both are checked separately
+    regardless of whether they are named.
+    """
     tree = strip_docstrings(ast.parse(path.read_text(), filename=str(path)))
+
+    named_constant_lines = set()
+    if skip_named_constants:
+        for node in tree.body:
+            if not isinstance(node, (ast.Assign, ast.AnnAssign)):
+                continue
+            targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+            if not all(isinstance(t, ast.Name) and t.id.isupper() for t in targets):
+                continue
+            if node.value is not None:
+                named_constant_lines.update(
+                    n.lineno for n in ast.walk(node.value) if hasattr(n, "lineno")
+                )
+
     found = []
     for node in ast.walk(tree):
         if isinstance(node, ast.Constant) and isinstance(node.value, (int, float)):
             if isinstance(node.value, bool):
+                continue
+            if node.lineno in named_constant_lines:
                 continue
             found.append((node.lineno, node.value))
     return found
@@ -77,14 +100,45 @@ def test_no_cpt_shaped_integers_in_engine_source(path):
 
 @pytest.mark.parametrize("path", engine_sources(), ids=lambda p: p.name)
 def test_only_structural_integers_in_engine_source(path):
-    """Catches magic numbers generally, not just CPT-shaped ones."""
+    """Catches magic numbers generally, not just CPT-shaped ones.
+
+    A module-level UPPER_CASE constant counts as explained. An inline number
+    does not.
+    """
     unexpected = [
         (line, value)
-        for line, value in numeric_literals(path)
+        for line, value in numeric_literals(path, skip_named_constants=True)
         if isinstance(value, int) and value not in ALLOWED_INTS
     ]
     assert not unexpected, (
-        f"{path.name} contains unexplained integer literal(s): {unexpected}."
+        f"{path.name} contains unexplained integer literal(s): {unexpected}. "
+        "Give it a module-level UPPER_CASE name explaining what it is."
+    )
+
+
+def test_inline_magic_integer_still_fails_when_not_named(tmp_path):
+    """The relaxation must not swallow an inline magic number."""
+    planted = tmp_path / "planted.py"
+    planted.write_text("NAMED_LIMIT = 20\n\n\ndef f(xs):\n    return xs[:37]\n")
+
+    ints = [
+        v for _, v in numeric_literals(planted, skip_named_constants=True)
+        if isinstance(v, int) and v not in ALLOWED_INTS
+    ]
+    assert ints == [37], f"expected only the inline 37 to survive, got {ints}"
+
+
+def test_a_named_cpt_code_is_still_caught(tmp_path):
+    """Naming a constant must not launder CMS data into engine source."""
+    planted = tmp_path / "planted.py"
+    planted.write_text("DEFAULT_CODE = 99214\nDEFAULT_RATE = 110.50\n")
+
+    all_literals = [v for _, v in numeric_literals(planted, skip_named_constants=True)]
+    assert all_literals == [], "named constants are skipped by the general int check"
+
+    unfiltered = [v for _, v in numeric_literals(planted)]
+    assert 99214 in unfiltered and 110.50 in unfiltered, (
+        "the CPT and float checks must see named constants — they do not skip them"
     )
 
 
