@@ -75,12 +75,30 @@ class RateEngine:
         setting: Setting,
         service_date: date,
     ) -> RateResult:
-        """The allowed amount, or a specific reason there isn't one.
+        """The allowed amount for a ZIP, or a specific reason there isn't one.
 
         Raises a RateUnavailable subclass rather than returning a fallback.
+        Requires a loaded ZIP-to-locality crosswalk; when one is unavailable,
+        use rate_for_locality with a locality id taken from the GPCI file.
+        """
+        return self.rate_for_locality(
+            cpt_code, self.locality_for_zip(zip_code), setting, service_date
+        )
+
+    def rate_for_locality(
+        self,
+        cpt_code: str,
+        locality_id: str,
+        setting: Setting,
+        service_date: date,
+    ) -> RateResult:
+        """The allowed amount for an explicit MAC locality.
+
+        CMS distributes the ZIP-to-locality crosswalk through channels that are
+        not reliably public, so callers who already know the locality — or who
+        resolve it by other means — can price without one.
         """
         period = self.period_for(service_date)
-        locality_id = self.locality_for_zip(zip_code)
         code = cpt_code.upper().strip()
 
         try:

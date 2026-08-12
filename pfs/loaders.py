@@ -22,8 +22,16 @@ from typing import Dict, Iterator, List, Optional, Sequence, Tuple, Union
 
 from .models import GPCI, RVUs
 
-# A CSV field is addressed by header name; a fixed-width field by [start, end).
-FieldSpec = Union[str, Tuple[int, int]]
+# How a field is addressed in a file:
+#   "HCPCS"                     header name
+#   5                           column position, 0-based
+#   [start, end]                fixed-width character slice
+#   {"join": [0, 2], "sep": "-"}  several columns combined into one key
+#
+# Position matters because CMS's RVU file splits its header across four rows
+# and repeats names within one of them — "PE RVU" appears twice, once for
+# non-facility and once for facility. Only position tells them apart.
+FieldSpec = Union[str, int, Tuple[int, int], Dict[str, object]]
 
 # How many bad rows to list before truncating. A malformed file can produce
 # thousands; the first handful is what tells you what went wrong.
@@ -85,31 +93,76 @@ class ColumnMap:
         )
 
 
-def _match_headers(path: Path, available: Sequence[str], colmap: ColumnMap) -> Dict[str, str]:
-    """Resolve mapped column names against the file's actual headers.
+DEFAULT_JOIN_SEPARATOR = "-"
 
-    Compares case-insensitively with collapsed whitespace, because CMS headers
-    vary in capitalisation and internal spacing between releases. An unmatched
-    column is fatal and reports what the file actually contains.
+
+def _resolve_indices(path: Path, headers: Sequence[str], colmap: ColumnMap) -> Dict[str, dict]:
+    """Resolve each mapped field to column positions.
+
+    Returns {field: {"indices": [...], "sep": str}}. Names are matched
+    case-insensitively with collapsed whitespace, since CMS varies both
+    between releases. Positions are used as given.
     """
     def key(text: str) -> str:
         return " ".join(str(text).split()).upper()
 
-    lookup = {key(h): h for h in available if h is not None and str(h).strip()}
-    resolved, missing = {}, []
-    for name, spec in colmap.fields.items():
-        actual = lookup.get(key(spec))
-        if actual is None:
-            missing.append(spec)
-        else:
-            resolved[name] = actual
+    by_name: Dict[str, int] = {}
+    for position, header in enumerate(headers):
+        if header is None or not str(header).strip():
+            continue
+        by_name.setdefault(key(header), position)
 
-    if missing:
-        raise FileFormatError(
-            path,
-            [f"column {c!r} not in file; available: {sorted(lookup.values())}" for c in missing],
-        )
+    def one(spec, problems) -> Optional[int]:
+        if isinstance(spec, bool):
+            problems.append(f"{spec!r} is not a valid column reference")
+            return None
+        if isinstance(spec, int):
+            if 0 <= spec < len(headers):
+                return spec
+            problems.append(f"column position {spec} is outside the file's {len(headers)} columns")
+            return None
+        position = by_name.get(key(spec))
+        if position is None:
+            problems.append(
+                f"column {spec!r} not in file; available: {sorted(by_name)}"
+            )
+        return position
+
+    resolved: Dict[str, dict] = {}
+    problems: List[str] = []
+
+    for name, spec in colmap.fields.items():
+        if isinstance(spec, dict):
+            parts = [one(s, problems) for s in spec.get("join", [])]
+            if any(p is None for p in parts):
+                continue
+            resolved[name] = {
+                "indices": parts,
+                "sep": str(spec.get("sep", DEFAULT_JOIN_SEPARATOR)),
+            }
+            continue
+
+        position = one(spec, problems)
+        if position is not None:
+            resolved[name] = {"indices": [position], "sep": ""}
+
+    if problems:
+        raise FileFormatError(path, problems)
     return resolved
+
+
+def _assemble(row: Sequence, resolved: Dict[str, dict]) -> Dict[str, str]:
+    """Pull one record out of a raw row using resolved positions."""
+    def cell(index: int) -> str:
+        if index >= len(row):
+            return ""
+        value = row[index]
+        return "" if value is None else str(value).strip()
+
+    return {
+        name: spec["sep"].join(cell(i) for i in spec["indices"])
+        for name, spec in resolved.items()
+    }
 
 
 def _xlsx_rows(path: Path, colmap: ColumnMap) -> Iterator[Tuple[int, Dict[str, str]]]:
@@ -135,16 +188,14 @@ def _xlsx_rows(path: Path, colmap: ColumnMap) -> Iterator[Tuple[int, Dict[str, s
         if header is None:
             raise FileFormatError(path, ["no header row found after skip_rows"])
 
-        resolved = _match_headers(path, [str(h) if h is not None else "" for h in header], colmap)
-        index = {str(h) if h is not None else "": i for i, h in enumerate(header)}
+        resolved = _resolve_indices(
+            path, [str(h) if h is not None else "" for h in header], colmap
+        )
 
         for offset, row in enumerate(rows, start=colmap.skip_rows + 2):
             if all(cell is None or str(cell).strip() == "" for cell in row):
                 continue
-            yield offset, {
-                name: ("" if row[index[actual]] is None else str(row[index[actual]]).strip())
-                for name, actual in resolved.items()
-            }
+            yield offset, _assemble(row, resolved)
     finally:
         # The row iterator holds its own handle into the zip archive. Closing
         # the workbook alone leaves that one open when iteration is abandoned
@@ -173,17 +224,16 @@ def _rows(path: Path, colmap: ColumnMap) -> Iterator[Tuple[int, Dict[str, str]]]
             }
         return
 
-    reader = csv.DictReader(lines)
-    if reader.fieldnames is None:
+    rows = list(csv.reader(lines))
+    if not rows:
         raise FileFormatError(path, ["file has no header row"])
 
-    resolved = _match_headers(path, reader.fieldnames, colmap)
+    resolved = _resolve_indices(path, rows[0], colmap)
 
-    for offset, row in enumerate(reader, start=colmap.skip_rows + 2):
-        yield offset, {
-            name: (row.get(actual) or "").strip()
-            for name, actual in resolved.items()
-        }
+    for offset, row in enumerate(rows[1:], start=colmap.skip_rows + 2):
+        if not any(str(cell).strip() for cell in row):
+            continue
+        yield offset, _assemble(row, resolved)
 
 
 def _number(raw: str, *, allow_blank: bool = False) -> Optional[float]:
@@ -317,3 +367,43 @@ def load_zip_crosswalk(path: Union[str, Path], colmap: ColumnMap) -> Dict[str, s
     if not table:
         raise FileFormatError(path, ["no crosswalk rows parsed"])
     return table
+
+
+def load_conversion_factor(path: Union[str, Path], colmap: ColumnMap) -> float:
+    """Read the conversion factor from the RVU file.
+
+    CMS repeats the factor on every data row. Reading it from the file rather
+    than hardcoding it is the difference between a number that stays correct
+    when CMS republishes and one that silently goes stale.
+
+    Every row must agree. A file carrying two different factors is ambiguous
+    and is refused rather than resolved by picking one.
+    """
+    path = Path(path)
+    colmap.require("conversion_factor")
+
+    seen: Dict[float, int] = {}
+    problems: List[str] = []
+
+    for line_no, raw in _rows(path, colmap):
+        text = raw["conversion_factor"]
+        if not text:
+            continue
+        try:
+            value = _number(text)
+        except ValueError:
+            problems.append(f"line {line_no}: conversion factor {text!r} is not a number")
+            continue
+        seen[value] = seen.get(value, 0) + 1
+
+    if problems:
+        raise FileFormatError(path, problems)
+    if not seen:
+        raise FileFormatError(path, ["no conversion factor found in any row"])
+    if len(seen) > 1:
+        raise FileFormatError(
+            path,
+            [f"file carries {len(seen)} different conversion factors: "
+             + ", ".join(f"{v} on {n} row(s)" for v, n in sorted(seen.items()))],
+        )
+    return next(iter(seen))

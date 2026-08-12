@@ -1,0 +1,12 @@
+{
+  "_source_file": "GPCI2026.csv — Addendum E, Final CY2026 GPCIs by state and Medicare locality",
+  "_note": "Locality number is not unique on its own — Alabama and Arizona are both locality '00' under different MACs. The key is MAC + locality number.",
+  "skip_rows": 2,
+  "fields": {
+    "locality_id": {"join": ["Medicare Administrative Contractor (MAC)", "Locality Number"], "sep": "-"},
+    "locality_name": "Locality Name",
+    "work": "2026 PW GPCI (with 1.0 Floor)***",
+    "practice_expense": "2026 PE GPCI",
+    "malpractice": "2026 MP GPCI"
+  }
+}

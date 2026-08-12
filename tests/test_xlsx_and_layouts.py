@@ -200,17 +200,18 @@ def test_json_layout_supports_fixed_width_offsets(tmp_path):
     assert colmap.fields["cpt_code"] == (0, 5)
 
 
-def test_shipped_candidate_layouts_are_wellformed():
-    """The candidate layouts must at least parse and cover required fields."""
+def test_shipped_layouts_are_wellformed():
+    """Every shipped layout must parse and cover the fields its loader needs."""
     from pathlib import Path
 
     layouts = Path(__file__).resolve().parent.parent / "layouts"
 
-    rvu = ColumnMap.from_json(layouts / "candidate_pprrvu_2026.json")
+    rvu = ColumnMap.from_json(layouts / "pprrvu_2026.json")
     rvu.require(
         "cpt_code", "work", "practice_expense_facility",
         "practice_expense_non_facility", "malpractice", "status_code",
+        "conversion_factor",
     )
 
-    gpci = ColumnMap.from_json(layouts / "candidate_gpci_2026.json")
+    gpci = ColumnMap.from_json(layouts / "gpci_2026.json")
     gpci.require("locality_id", "locality_name", "work", "practice_expense", "malpractice")
