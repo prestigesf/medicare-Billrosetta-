@@ -1,0 +1,52 @@
+{
+  "payload": {
+    "dependencies": {
+      "Pygments": "2.20.0",
+      "et_xmlfile": "2.0.0",
+      "iniconfig": "2.3.0",
+      "openpyxl": "3.1.5",
+      "packaging": "26.3",
+      "pluggy": "1.6.0",
+      "pytest": "9.1.1"
+    },
+    "git_commit": "5bbc43413551c5a7ab155a4fa7af20abf28ef46f",
+    "overall_status": "PASS",
+    "phase": "5",
+    "raw_output_file": "evidence/phase5_raw_test_output.txt",
+    "raw_output_sha256": "40a0b514bdb5a78afc92997436912ced6bb599291015e3c78b6decaeb6408ce5",
+    "runtime": {
+      "implementation": "CPython",
+      "platform": "Linux-6.18.5-fc-v20-x86_64-with-glibc2.39",
+      "python": "3.11.15"
+    },
+    "source_file_sha256": {
+      "README.md": "4bae6f105ac06d52feaf28202f84c6c6f8544fc2bed0120321ad43b17d14b8cf",
+      "pfs/__init__.py": "e7250b50367f58acd32c7d33b0301f781ee319856108c13f2158c254693d9e18",
+      "pfs/engine.py": "34b9f76b8fd3447ab315c4978bb2a7b5f98f5297064861e737915f1168762c20",
+      "pfs/errors.py": "e6e6c526fd6aa3f83f533f67cc2cc38224247469080cf7143981c9fe807259eb",
+      "pfs/formula.py": "90a1f8dd8715751ade4dcc41b8695774f25e5b7c20c24936c2d46924a5a4ff43",
+      "pfs/loaders.py": "992cc91032ffb25298681e83547503a3f95140558681eebe465e20b9d008ff45",
+      "pfs/models.py": "a5790dfa7277f6cc7909fa716208fc3e8627d76dacb039592f18405bad15de1d",
+      "pyproject.toml": "e6b96a222f96b8c5ba4d1c22d5be96dd3753e60979c84dbd691aa3b3160db604",
+      "tests/test_engine.py": "38212cfa0ef86ec433b586ac457e403300bd6b4551891d72bcf47b407015d8f5",
+      "tests/test_formula.py": "83f9ea4b01460e14d327462a25ac672d1a5a4f85622b1abe5bd8b73e19611a85",
+      "tests/test_invariants.py": "9e20a973ffe278cfbb0f3f6059035cee128767c398ec974bbe09a5790c3a4d26",
+      "tests/test_loaders.py": "53ca992edeb8c44630855609cb7bfe6079b427a41a679c3efe7b0a1f6db72445",
+      "tests/test_real_cms_data.py": "650b75da89e2f02d1a84a2da8389a985cbcb4184c325289dcb71be8cdcc55f57",
+      "tests/test_xlsx_and_layouts.py": "969271c453cdae9656b79b91382ce185484b936bf57c4905378c8a649e414bbc",
+      "tools/ingest_rvu.py": "afaa8633e34cf37731cf2e864d1a5597dc253fb4fbe2c2a95bc0d0cf2fd45be2",
+      "tools/make_evidence.py": "d09dcacb44967bc4d1da476729afe5b54760ed390a7f82ac001989285500e2a6",
+      "tools/phase_diff.py": "75f3266f3354d080b187e7364433ed294893580031a655601eee635224b39981"
+    },
+    "test_command": "python -m pytest -v -W error",
+    "test_counts": {
+      "error": "0",
+      "failed": "0",
+      "passed": "91",
+      "skipped": "0"
+    },
+    "test_exit_code": "0",
+    "timestamp_utc": "20260812T100130Z"
+  },
+  "payload_sha256": "539bf2d5bdea7cc3b75af06e8b0a9d9f9c711fab8a6e19bf4e19e99fb23dac7e"
+}

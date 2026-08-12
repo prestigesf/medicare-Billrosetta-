@@ -43,9 +43,22 @@ STATUS_CODE_MEANINGS = {
 }
 
 
+def rvu_key(cpt_code: str, modifier: str = "") -> str:
+    """Key for one priceable line: a code, optionally with its modifier.
+
+    A CPT code alone is not unique in the RVU file. Imaging and similar
+    services appear several times — once global, once as the professional
+    component (modifier 26), once as the technical component (TC) — each with
+    different RVUs. Keying on the code alone collides them.
+    """
+    code = cpt_code.upper().strip()
+    mod = (modifier or "").upper().strip()
+    return f"{code}-{mod}" if mod else code
+
+
 @dataclass(frozen=True)
 class RVUs:
-    """Relative value units for one CPT code, from the PPRRVU file."""
+    """Relative value units for one priceable line, from the PPRRVU file."""
 
     cpt_code: str
     work: float
@@ -53,6 +66,11 @@ class RVUs:
     practice_expense_non_facility: Optional[float]
     malpractice: float
     status_code: str
+    modifier: str = ""
+
+    @property
+    def key(self) -> str:
+        return rvu_key(self.cpt_code, self.modifier)
 
     def practice_expense_for(self, setting: Setting) -> Optional[float]:
         if setting is Setting.FACILITY:

@@ -261,9 +261,14 @@ def load_rvus(path: Union[str, Path], colmap: ColumnMap) -> Dict[str, RVUs]:
         code = raw["cpt_code"].upper()
         if not code:
             continue
+        # A code can appear several times with different modifiers — global,
+        # professional component (26), technical component (TC) — each with
+        # its own RVUs. They are separate priceable lines, not duplicates.
+        modifier = raw.get("modifier", "")
         try:
             entry = RVUs(
                 cpt_code=code,
+                modifier=modifier,
                 work=_number(raw["work"]),
                 # A code priced in only one setting leaves the other blank.
                 # That must stay None, never 0.0 — see MissingPracticeExpenseRVU.
@@ -281,13 +286,13 @@ def load_rvus(path: Union[str, Path], colmap: ColumnMap) -> Dict[str, RVUs]:
             continue
 
         if not entry.status_code:
-            problems.append(f"line {line_no}, CPT {code}: blank status code")
+            problems.append(f"line {line_no}, CPT {entry.key}: blank status code")
             continue
-        if code in table and table[code] != entry:
-            problems.append(f"line {line_no}, CPT {code}: conflicting duplicate row")
+        if entry.key in table and table[entry.key] != entry:
+            problems.append(f"line {line_no}, CPT {entry.key}: conflicting duplicate row")
             continue
 
-        table[code] = entry
+        table[entry.key] = entry
 
     if problems:
         raise FileFormatError(path, problems)

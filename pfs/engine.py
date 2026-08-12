@@ -15,7 +15,7 @@ from .errors import (
     UnmappedZipCode,
 )
 from .formula import geographic_components, round_money
-from .models import FeeSchedulePeriod, RateResult, Setting
+from .models import FeeSchedulePeriod, RateResult, Setting, rvu_key
 
 
 class RateEngine:
@@ -74,6 +74,7 @@ class RateEngine:
         zip_code: str,
         setting: Setting,
         service_date: date,
+        modifier: str = "",
     ) -> RateResult:
         """The allowed amount for a ZIP, or a specific reason there isn't one.
 
@@ -82,7 +83,7 @@ class RateEngine:
         use rate_for_locality with a locality id taken from the GPCI file.
         """
         return self.rate_for_locality(
-            cpt_code, self.locality_for_zip(zip_code), setting, service_date
+            cpt_code, self.locality_for_zip(zip_code), setting, service_date, modifier
         )
 
     def rate_for_locality(
@@ -91,6 +92,7 @@ class RateEngine:
         locality_id: str,
         setting: Setting,
         service_date: date,
+        modifier: str = "",
     ) -> RateResult:
         """The allowed amount for an explicit MAC locality.
 
@@ -100,12 +102,13 @@ class RateEngine:
         """
         period = self.period_for(service_date)
         code = cpt_code.upper().strip()
+        key = rvu_key(code, modifier)
 
         try:
-            rvus = period.rvus[code]
+            rvus = period.rvus[key]
         except KeyError:
             raise UnknownCPTCode(
-                f"CPT {code} is not in the {period.period_id} RVU file."
+                f"CPT {key} is not in the {period.period_id} RVU file."
             ) from None
 
         try:

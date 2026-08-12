@@ -18,6 +18,7 @@ from .errors import (
 )
 from .formula import compute_allowed_amount, round_money
 from .models import (
+    rvu_key,
     GPCI,
     FeeSchedulePeriod,
     RateResult,

@@ -203,3 +203,86 @@ def test_loaded_data_prices_end_to_end(tmp_path):
     # = (2.05440 + 2.38740 + 0.06720) * 33.00 = 4.50900 * 33.00 = 148.797 -> 148.80
     assert result.allowed_amount == 148.80
     assert result.source == "cms-pfs:test:01-05"
+
+
+# --- modifiers: the same CPT code priced several ways ------------------------
+
+MODIFIER_CSV = """HCPCS,MOD,DESC,WORK RVU,PE FAC,PE NONFAC,MP RVU,STATUS
+71046,,X-ray chest 2 views global,0.22,0.22,0.67,0.04,A
+71046,26,X-ray chest 2 views professional,0.22,0.08,0.08,0.02,A
+71046,TC,X-ray chest 2 views technical,0.00,0.14,0.59,0.02,A
+"""
+
+MODIFIER_MAP = ColumnMap(
+    fields={
+        "cpt_code": "HCPCS",
+        "modifier": "MOD",
+        "work": "WORK RVU",
+        "practice_expense_facility": "PE FAC",
+        "practice_expense_non_facility": "PE NONFAC",
+        "malpractice": "MP RVU",
+        "status_code": "STATUS",
+    }
+)
+
+
+def test_same_code_with_different_modifiers_loads_as_separate_lines(tmp_path):
+    """The bug this covers: the real PPRRVU would have been refused entirely.
+
+    Imaging codes appear three times — global, professional component (26),
+    technical component (TC) — each with different RVUs. Keyed on the code
+    alone they look like conflicting duplicates, and the whole file is
+    rejected.
+    """
+    table = load_rvus(write(tmp_path, "rvu.csv", MODIFIER_CSV), MODIFIER_MAP)
+
+    assert set(table) == {"71046", "71046-26", "71046-TC"}
+    assert table["71046"].work == 0.22
+    assert table["71046-26"].practice_expense_non_facility == 0.08
+    assert table["71046-TC"].work == 0.00
+
+
+def test_modifier_components_are_not_collapsed(tmp_path):
+    """Professional and technical must stay distinct — they price differently."""
+    table = load_rvus(write(tmp_path, "rvu.csv", MODIFIER_CSV), MODIFIER_MAP)
+
+    professional = table["71046-26"]
+    technical = table["71046-TC"]
+    assert professional.work > technical.work
+    assert technical.practice_expense_non_facility > professional.practice_expense_non_facility
+
+
+def test_genuinely_conflicting_rows_are_still_rejected(tmp_path):
+    """Modifier support must not turn off duplicate detection."""
+    conflicting = MODIFIER_CSV + "71046,26,X-ray chest 2 views,9.99,0.08,0.08,0.02,A\n"
+    with pytest.raises(FileFormatError, match="conflicting duplicate"):
+        load_rvus(write(tmp_path, "rvu.csv", conflicting), MODIFIER_MAP)
+
+
+def test_engine_prices_a_modifier_line(tmp_path):
+    """A bill line carrying -26 must price the professional component."""
+    from datetime import date
+
+    from pfs import FeeSchedulePeriod, RateEngine, Setting
+
+    rvus = load_rvus(write(tmp_path, "rvu.csv", MODIFIER_CSV), MODIFIER_MAP)
+    gpcis = load_gpcis(write(tmp_path, "gpci.csv", GPCI_CSV), GPCI_MAP)
+
+    period = FeeSchedulePeriod(
+        period_id="test",
+        effective_start=date(2026, 1, 1),
+        effective_end=date(2026, 12, 31),
+        conversion_factor=33.0,
+        rvus=rvus,
+        gpcis=gpcis,
+    )
+    engine = RateEngine([period], {})
+
+    global_rate = engine.rate_for_locality(
+        "71046", "01-05", Setting.NON_FACILITY, date(2026, 6, 1)
+    )
+    professional = engine.rate_for_locality(
+        "71046", "01-05", Setting.NON_FACILITY, date(2026, 6, 1), modifier="26"
+    )
+
+    assert professional.allowed_amount < global_rate.allowed_amount
