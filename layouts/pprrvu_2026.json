@@ -1,7 +1,6 @@
 {
   "_source_file": "PPRRVU2026_Jul_nonQPP.csv (RVU26C, released 06/30/2026)",
-  "_note": "Columns are addressed by position, not name. This file's header is split across four rows, and names repeat within the last one — 'PE RVU' appears twice (non-facility then facility) and 'RVU' appears twice (work then malpractice). Only position distinguishes them. Verified against published totals: 99214 non-facility total 3.88 = 1.92 + 1.83 + 0.13, facility total 2.84 = 1.92 + 0.79 + 0.13.",
-  "skip_rows": 7,
+  "_note": "Columns are addressed by position, not name. This file's header is split across four rows, and names repeat within the last one \u2014 'PE RVU' appears twice (non-facility then facility) and 'RVU' appears twice (work then malpractice). Only position distinguishes them. Verified against published totals: 99214 non-facility total 3.88 = 1.92 + 1.83 + 0.13, facility total 2.84 = 1.92 + 0.79 + 0.13. The header row is located by its first cell rather than a fixed offset: the full July release carries nine banner rows and its own excerpt carries eight.",
   "fields": {
     "cpt_code": 0,
     "modifier": 1,
@@ -12,5 +11,6 @@
     "practice_expense_facility": 8,
     "malpractice": 10,
     "conversion_factor": 25
-  }
+  },
+  "header_starts_with": "HCPCS"
 }

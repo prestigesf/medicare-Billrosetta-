@@ -66,6 +66,8 @@ class ColumnMap:
     skip_rows: int = 0
     encoding: str = "utf-8-sig"
     sheet: Optional[str] = None
+    header_starts_with: Optional[str] = None
+    stop_at_blank_row: bool = False
 
     def require(self, *names: str) -> None:
         missing = [n for n in names if n not in self.fields]
@@ -90,10 +92,36 @@ class ColumnMap:
             skip_rows=spec.get("skip_rows", 0),
             encoding=spec.get("encoding", "utf-8-sig"),
             sheet=spec.get("sheet"),
+            header_starts_with=spec.get("header_starts_with"),
+            stop_at_blank_row=spec.get("stop_at_blank_row", False),
         )
 
 
 DEFAULT_JOIN_SEPARATOR = "-"
+
+
+def _find_header(path: Path, rows: Sequence[Sequence], colmap: ColumnMap) -> int:
+    """Index of the header row.
+
+    When header_starts_with is set, the header is located by its first cell
+    rather than by a fixed offset. CMS varies the number of banner and
+    copyright rows between releases of the same file — the July full release
+    carries nine, its own excerpt carries eight — so a hardcoded skip_rows
+    silently reads a banner as the header and every column resolves wrong.
+    """
+    if not colmap.header_starts_with:
+        return colmap.skip_rows
+
+    wanted = colmap.header_starts_with.strip().upper()
+    for index, row in enumerate(rows):
+        if row and str(row[0]).strip().upper() == wanted:
+            return index
+
+    raise FileFormatError(
+        path,
+        [f"no header row starting with {colmap.header_starts_with!r} found "
+         f"in the first {len(rows)} rows"],
+    )
 
 
 def _resolve_indices(path: Path, headers: Sequence[str], colmap: ColumnMap) -> Dict[str, dict]:
@@ -211,11 +239,13 @@ def _rows(path: Path, colmap: ColumnMap) -> Iterator[Tuple[int, Dict[str, str]]]
         yield from _xlsx_rows(path, colmap)
         return
 
-    text = path.read_text(encoding=colmap.encoding)
-    lines = text.splitlines()[colmap.skip_rows:]
+    text = path.read_text(encoding=colmap.encoding, errors="replace")
+    lines = text.splitlines()
 
     if colmap.fixed_width:
-        for offset, line in enumerate(lines, start=colmap.skip_rows + 1):
+        # Fixed-width files are addressed by character offset, so the header is
+        # discarded by count rather than located by content.
+        for offset, line in enumerate(lines[colmap.skip_rows:], start=colmap.skip_rows + 1):
             if not line.strip():
                 continue
             yield offset, {
@@ -228,10 +258,15 @@ def _rows(path: Path, colmap: ColumnMap) -> Iterator[Tuple[int, Dict[str, str]]]
     if not rows:
         raise FileFormatError(path, ["file has no header row"])
 
-    resolved = _resolve_indices(path, rows[0], colmap)
+    header_index = _find_header(path, rows, colmap)
+    resolved = _resolve_indices(path, rows[header_index], colmap)
 
-    for offset, row in enumerate(rows[1:], start=colmap.skip_rows + 2):
+    for offset, row in enumerate(rows[header_index + 1:], start=header_index + 2):
         if not any(str(cell).strip() for cell in row):
+            # CMS appends footnotes below the data, separated by a blank row.
+            # Reading past it turns note text into a malformed record.
+            if colmap.stop_at_blank_row:
+                return
             continue
         yield offset, _assemble(row, resolved)
 

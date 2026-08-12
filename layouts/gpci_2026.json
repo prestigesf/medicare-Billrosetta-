@@ -1,12 +1,20 @@
 {
-  "_source_file": "GPCI2026.csv — Addendum E, Final CY2026 GPCIs by state and Medicare locality",
-  "_note": "Locality number is not unique on its own — Alabama and Arizona are both locality '00' under different MACs. The key is MAC + locality number.",
-  "skip_rows": 2,
+  "_source_file": "GPCI2026.csv \u2014 Addendum E, Final CY2026 GPCIs by state and Medicare locality",
+  "_note": "Locality is identified by MAC + State + Locality Number. Neither the locality number nor MAC+locality is unique: MAC 05102 serves Connecticut and Iowa, both locality 00, with different GPCIs (CT PE 1.122 vs IA 0.900); MAC 03502 does the same for South Dakota and Utah. Keying on anything less silently prices one state with another's indices.",
   "fields": {
-    "locality_id": {"join": ["Medicare Administrative Contractor (MAC)", "Locality Number"], "sep": "-"},
+    "locality_id": {
+      "join": [
+        "Medicare Administrative Contractor (MAC)",
+        "State",
+        "Locality Number"
+      ],
+      "sep": "-"
+    },
     "locality_name": "Locality Name",
     "work": "2026 PW GPCI (with 1.0 Floor)***",
     "practice_expense": "2026 PE GPCI",
     "malpractice": "2026 MP GPCI"
-  }
+  },
+  "header_starts_with": "Medicare Administrative Contractor (MAC)",
+  "stop_at_blank_row": true
 }
