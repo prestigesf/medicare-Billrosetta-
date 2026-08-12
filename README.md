@@ -98,3 +98,11 @@ imaging are the correct cases.
 ## Tests
 
     python -m pytest -W error
+
+## Demo
+
+    python demo.py
+
+Loads the CMS release, works the calculation for one code, prices the same
+code across localities and settings, prices a whole bill, states its own
+limits, and runs the suite. Everything printed is computed at runtime.
