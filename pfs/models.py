@@ -40,6 +40,13 @@ STATUS_CODE_MEANINGS = {
     "N": "non-covered service",
     "P": "bundled or excluded, no separate payment",
     "X": "statutory exclusion",
+    # Present in the CY2026 release and carrying zero RVUs on every row. The
+    # exact wording of their published definitions is not confirmed here, so
+    # they are described by what the data shows rather than by a label taken
+    # on faith. Both are non-priceable either way.
+    "J": "no fee-schedule RVUs; observed only on anaesthesia-range codes, "
+         "which are priced under a separate methodology",
+    "M": "no fee-schedule RVUs; observed only on measurement-type codes",
 }
 
 

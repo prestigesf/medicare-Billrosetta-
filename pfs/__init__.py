@@ -17,6 +17,7 @@ from .errors import (
     UnmappedZipCode,
 )
 from .formula import compute_allowed_amount, round_money
+from .locality import AmbiguousLocality, LocalityDirectory, UnknownState
 from .models import (
     rvu_key,
     GPCI,
