@@ -1,0 +1,6 @@
+cpt_code,modifier,description,charged_amount,date_of_service,setting,state,locality_id
+99214,,Office visit established moderate,340.00,2026-03-14,non-facility,,PLACEHOLDER
+99213,,Office visit established low,210.00,2026-03-14,non-facility,,PLACEHOLDER
+93000,,Electrocardiogram complete,145.00,2026-03-14,non-facility,,PLACEHOLDER
+20610,,Arthrocentesis major joint,425.00,2026-03-14,non-facility,,PLACEHOLDER
+97110,,Therapeutic exercises,180.00,2026-03-14,non-facility,,PLACEHOLDER
