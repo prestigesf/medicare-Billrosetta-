@@ -1,0 +1,9 @@
+cpt_code,modifier,description,charged_amount,date_of_service,setting,state,locality_id
+99214,,Office visit established moderate,340.00,2026-03-14,non-facility,AL,
+99213,,Office visit established low,210.00,2026-03-14,non-facility,AL,
+71046,26,Chest X-ray 2 views professional read,185.00,2026-03-14,non-facility,AL,
+80053,,Comprehensive metabolic panel,95.00,2026-03-14,non-facility,AL,
+27215,,Treatment of pelvic fracture,1450.00,2026-03-14,facility,AL,
+99215,,Office visit established high,520.00,2026-04-02,non-facility,,01112-CA-05
+99999,,Not a real code,300.00,2026-03-14,non-facility,AL,
+99214,,Office visit established moderate,395.00,2026-05-11,non-facility,CA,

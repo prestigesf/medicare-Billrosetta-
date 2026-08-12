@@ -54,23 +54,38 @@ GPCIs are not interchangeable. Money is rounded once, at the end, half-up
 (Python's built-in `round()` is half-to-even, which rounds inconsistently in a
 way nobody wants to explain to a claims administrator).
 
+## Pricing a whole bill
+
+    python tools/price_bill.py examples/sample_bill.csv
+
+Input columns: `cpt_code`, `charged_amount`, `date_of_service`, `setting`, and
+either `locality_id` or `state`. Optional: `modifier`, `description`.
+
+Output is one row per billed line carrying the Medicare allowed amount, the
+variance, the multiple of Medicare, the rate source, and the full derivation —
+or, where a line has no defensible benchmark, the reason why. One bad line
+never fails the batch, and nothing is estimated.
+
+A line is flagged when the charge exceeds the benchmark by more than the
+multiple in `policy/materiality.json` (currently 1.5). Below that the
+difference is reported but not framed as a finding.
+
 ## Status
 
-The calculation and lookup are built and tested — 27 tests, run with warnings
-as errors. **No CMS data is loaded yet.** The fixtures in `tests/` are
-illustrative: the structure is real, the numbers are not CMS's.
+Loaded and verified against the complete CMS RVU26C release (July 2026):
+**19,356 priceable lines, 98 localities, conversion factor 33.4009** read from
+the file rather than hardcoded. 142 tests, run with warnings as errors.
 
-To make rates real, three CMS files are needed:
-
-| File | Provides |
+| File | Status |
 | --- | --- |
-| PPRRVU (Physician Fee Schedule RVU file) | work / PE / MP RVUs and status code per CPT |
-| GPCI file | the three geographic indices per MAC locality |
-| ZIP-to-locality crosswalk | maps a ZIP to its locality id |
+| `PPRRVU2026_Jul_nonQPP.csv` | loaded — `data/cms/rvu26c/` |
+| `GPCI2026.csv` | loaded — `data/cms/rvu26c/` |
+| ZIP-to-locality crosswalk | **not available**; CMS does not reliably publish it |
 
-Loaders are deliberately not written yet. They will be written against the
-real column layouts rather than assumed ones — writing a parser against a
-guessed format is how you get code that looks finished and is not.
+Without the crosswalk, 36 of 53 states and territories still resolve from the
+state alone, because they contain exactly one locality. The other 17 need
+either an explicit `locality_id` or a crosswalk: CA, FL, GA, IL, LA, MA, MD,
+ME, MI, MO, NJ, NY, OR, PA, TX, WA, WV.
 
 ## Scope
 

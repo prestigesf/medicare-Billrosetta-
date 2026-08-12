@@ -1,0 +1,4 @@
+{
+  "_note": "Policy, not CMS data. A line is called out when the charge exceeds the Medicare allowed amount by more than this multiple. Below it the difference is still reported, but not framed as a finding — a small overage is not worth a letter, and calling it one costs credibility on the lines that matter. Kept as data so the threshold can be changed, and audited, without touching code.",
+  "materiality_multiple": 1.5
+}
