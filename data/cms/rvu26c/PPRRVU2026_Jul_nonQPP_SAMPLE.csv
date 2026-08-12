@@ -1,0 +1,18 @@
+,,2026 National Physician Fee Schedule Relative Value File July Release,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,CPT codes and descriptions only are copyright 2026 American Medical Association. All Rights Reserved. Applicable FARS/DFARS Apply.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,Dental codes (D codes) are copyright 2026 American Dental Association. All Rights Reserved.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,RELEASED 06/30/2026,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,NOT USED,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,FOR,,NON-FAC,,FACILITY,,,,,,,,,,,,,,,,,,,,
+,,,STATUS,MEDICARE,WORK,NON-FAC,NA,FACILITY,NA,MP,NON-FACILITY,FACILITY,PCTC,GLOBAL,PRE,INTRA,POST,MULT,BILAT,ASST,CO,TEAM,ENDO,CONV,PHYS,CHEMO,FAMILY,OPPS,OPPS,OPPS
+HCPCS,MOD,DESCRIPTION,CODE,PAYMENT,RVU,PE RVU,INDICATOR,PE RVU,INDICATOR,RVU,TOTAL,TOTAL,IND,DAYS,OP,OP,OP,PROC,SURG,SURG,SURG,SURG,IND,BASE,FACTOR,PROCEDURES,FLAG,INDICATOR,AMOUNT,AMOUNT,AMOUNT
+0001F,,Heart failure composite,I,,0.00,0.00,,0.00,,0.00,0.00,0.00,9,XXX,0.00,0.00,0.00,9,9,9,9,9,9,,33.4009,09,0,99,0.00,0.00,0.00
+0005F,,Osteoarthritis composite,I,,0.00,0.00,,0.00,,0.00,0.00,0.00,9,XXX,0.00,0.00,0.00,9,9,9,9,9,9,,33.4009,09,0,99,0.00,0.00,0.00
+00100,,Anes px salivary gland w/bx,J,,0.00,0.00,,0.00,,0.00,0.00,0.00,9,XXX,0.00,0.00,0.00,9,9,9,9,9,9,,33.4009,09,0,99,0.00,0.00,0.00
+00102,,Anes px plstc rpr cleft lip,J,,0.00,0.00,,0.00,,0.00,0.00,0.00,9,XXX,0.00,0.00,0.00,9,9,9,9,9,9,,33.4009,09,0,99,0.00,0.00,0.00
+00103,,Anes rcnstv px eyelid,J,,0.00,0.00,,0.00,,0.00,0.00,0.00,9,XXX,0.00,0.00,0.00,9,9,9,9,9,9,,33.4009,09,0,99,0.00,0.00,0.00
+99213,,Office o/p est low 20 min,A,,1.30,1.35,,0.57,,0.09,2.74,1.96,0,010,0.00,0.00,0.00,2,2,2,1,0,0,,33.4009,09,0,99,0.00,0.00,0.00
+99214,,Office o/p est mod 30 min,A,,1.92,1.83,,0.79,,0.13,3.88,2.84,0,010,0.00,0.00,0.00,2,2,2,1,0,0,,33.4009,09,0,99,0.00,0.00,0.00
+99215,,Office o/p est hi 40 min,A,,2.80,2.55,,1.13,,0.20,5.55,4.13,0,010,0.00,0.00,0.00,2,2,2,1,0,0,,33.4009,09,0,99,0.00,0.00,0.00
+71046,,X-ray exam chest 2 views,A,,0.22,0.67,,0.22,,0.04,0.93,0.48,0,XXX,0.00,0.00,0.00,2,2,2,1,0,0,,33.4009,09,0,99,0.00,0.00,0.00
+93000,,Electrocardiogram complete,A,,0.17,0.25,,0.08,,0.02,0.44,0.27,0,XXX,0.00,0.00,0.00,2,2,2,1,0,0,,33.4009,09,0,99,0.00,0.00,0.00
