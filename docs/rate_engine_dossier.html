@@ -1,0 +1,597 @@
+<title>Medicare Rate Engine</title>
+
+<style>
+  /* ============================================================
+     Medicare Rate Engine — technical dossier
+
+     Palette taken from the subject's own paperwork: federal rate
+     addenda and engineering datasheets. Cool form-paper neutrals
+     biased toward a spruce accent; semantic green/rust reserved
+     strictly for priced vs refused, never decoration.
+
+     Prose is set in a serif — this is a document meant to be
+     defended. Every number is monospaced and tabular, because
+     the whole claim of the thing is that the arithmetic checks.
+     ============================================================ */
+
+  :root {
+    --ground:    #F1F4F3;
+    --surface:   #FAFBFA;
+    --raised:    #E7ECEA;
+    --rule:      #C8D2CE;
+    --rule-soft: #DDE4E1;
+    --ink:       #12161A;
+    --ink-mid:   #4A544F;
+    --ink-faint: #78837D;
+    --accent:    #1F4D42;
+    --priced:    #2C6E56;
+    --priced-bg: #E3EDE7;
+    --refused:   #8C3A2E;
+    --refused-bg:#F3E5E2;
+
+    --display: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --prose:   Georgia, "Iowan Old Style", "Palatino Linotype", serif;
+    --data:    ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+
+    --s-1: clamp(0.72rem, 0.7rem + 0.08vw, 0.78rem);
+    --s0:  clamp(0.94rem, 0.91rem + 0.14vw, 1.02rem);
+    --s1:  clamp(1.12rem, 1.05rem + 0.34vw, 1.32rem);
+    --s2:  clamp(1.5rem, 1.32rem + 0.8vw, 2.05rem);
+    --s3:  clamp(2.1rem, 1.7rem + 1.8vw, 3.4rem);
+
+    --measure: 68ch;
+    --edge: clamp(1.1rem, 5vw, 4rem);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:    #0E1211;
+      --surface:   #151B19;
+      --raised:    #1D2523;
+      --rule:      #2E3936;
+      --rule-soft: #232C2A;
+      --ink:       #E5EAE7;
+      --ink-mid:   #A3AEA9;
+      --ink-faint: #737E79;
+      --accent:    #7FC9AF;
+      --priced:    #6FBFA5;
+      --priced-bg: #16241F;
+      --refused:   #E08575;
+      --refused-bg:#2A1A17;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground:    #0E1211;
+    --surface:   #151B19;
+    --raised:    #1D2523;
+    --rule:      #2E3936;
+    --rule-soft: #232C2A;
+    --ink:       #E5EAE7;
+    --ink-mid:   #A3AEA9;
+    --ink-faint: #737E79;
+    --accent:    #7FC9AF;
+    --priced:    #6FBFA5;
+    --priced-bg: #16241F;
+    --refused:   #E08575;
+    --refused-bg:#2A1A17;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--prose);
+    font-size: var(--s0);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 74rem; margin: 0 auto; padding: 0 var(--edge); }
+  .measure { max-width: var(--measure); }
+
+  h1, h2, h3 {
+    font-family: var(--display);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    text-wrap: balance;
+    margin: 0;
+  }
+  h1 { font-size: var(--s3); line-height: 1.02; }
+  h2 { font-size: var(--s2); line-height: 1.12; }
+  h3 { font-size: var(--s1); line-height: 1.25; letter-spacing: -0.015em; }
+
+  p { margin: 0; }
+  .stack { display: flex; flex-direction: column; gap: 1rem; }
+  .stack-lg { display: flex; flex-direction: column; gap: 1.9rem; }
+
+  .eyebrow {
+    font-family: var(--data);
+    font-size: var(--s-1);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  code, .num { font-family: var(--data); font-variant-numeric: tabular-nums; }
+  code {
+    font-size: 0.88em;
+    background: var(--raised);
+    padding: 0.1em 0.34em;
+  }
+
+  /* ---------- masthead ---------- */
+
+  .masthead {
+    border-bottom: 2px solid var(--ink);
+    padding: clamp(2.6rem, 7vw, 5rem) 0 clamp(1.6rem, 3vw, 2.4rem);
+  }
+  .masthead .lede {
+    font-size: var(--s1);
+    color: var(--ink-mid);
+    max-width: 48ch;
+    margin-top: 1.2rem;
+  }
+
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    margin-top: 2.4rem;
+  }
+  .fact { background: var(--surface); padding: 0.95rem 1.1rem; }
+  .fact .k {
+    font-family: var(--data);
+    font-size: var(--s-1);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    display: block;
+    margin-bottom: 0.4rem;
+  }
+  .fact .v {
+    font-family: var(--data);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--s1);
+    color: var(--ink);
+    line-height: 1;
+  }
+  .fact .v.accent { color: var(--accent); }
+
+  section { border-bottom: 1px solid var(--rule-soft); padding: clamp(2.4rem, 5.5vw, 4rem) 0; }
+  section:last-of-type { border-bottom: 0; }
+  .head { display: flex; flex-direction: column; gap: 0.55rem; margin-bottom: 1.8rem; }
+
+  /* ---------- the worked calculation ---------- */
+
+  .calc {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--accent);
+    padding: clamp(1.1rem, 3vw, 1.9rem);
+    overflow-x: auto;
+  }
+  .calc table { border-collapse: collapse; font-family: var(--data); font-size: var(--s0); }
+  .calc td {
+    padding: 0.3rem 0.9rem 0.3rem 0;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .calc td.label { color: var(--ink-faint); text-transform: uppercase; font-size: var(--s-1); letter-spacing: 0.09em; }
+  .calc td.op { color: var(--ink-faint); text-align: center; padding: 0.3rem 0.4rem; }
+  .calc td.n { text-align: right; }
+  .calc tr.sum td { border-top: 1px solid var(--rule); padding-top: 0.55rem; }
+  .calc tr.total td { padding-top: 0.5rem; font-size: var(--s1); color: var(--accent); font-weight: 700; }
+  .calc .prov {
+    margin-top: 1rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid var(--rule-soft);
+    font-family: var(--data);
+    font-size: var(--s-1);
+    color: var(--ink-faint);
+    white-space: nowrap;
+  }
+
+  /* ---------- tables ---------- */
+
+  .scroll { overflow-x: auto; border: 1px solid var(--rule); background: var(--surface); }
+  table.data { border-collapse: collapse; width: 100%; font-family: var(--data); font-size: var(--s-1); }
+  table.data th, table.data td {
+    padding: 0.55rem 0.85rem;
+    text-align: right;
+    white-space: nowrap;
+    border-bottom: 1px solid var(--rule-soft);
+    font-variant-numeric: tabular-nums;
+  }
+  table.data th {
+    text-align: right;
+    font-weight: 400;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    border-bottom: 1px solid var(--rule);
+    position: sticky;
+    top: 0;
+    background: var(--surface);
+  }
+  table.data th:first-child, table.data td:first-child { text-align: left; }
+  table.data td.desc { text-align: left; color: var(--ink-mid); white-space: normal; min-width: 14rem; }
+  table.data tr:last-child td { border-bottom: 0; }
+
+  .pill {
+    display: inline-block;
+    font-family: var(--data);
+    font-size: 0.68rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    padding: 0.16rem 0.46rem;
+    border: 1px solid currentColor;
+  }
+  .pill.ok { color: var(--priced); background: var(--priced-bg); }
+  .pill.no { color: var(--refused); background: var(--refused-bg); }
+
+  td.flag { color: var(--refused); font-weight: 700; }
+
+  /* ---------- findings ---------- */
+
+  .findings { display: flex; flex-direction: column; gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
+  .finding {
+    background: var(--surface);
+    padding: clamp(1rem, 2.6vw, 1.6rem);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.6rem;
+  }
+  .finding .what { font-family: var(--display); font-weight: 700; letter-spacing: -0.015em; font-size: var(--s1); }
+  .finding p { color: var(--ink-mid); max-width: 62ch; }
+  .finding .caught {
+    font-family: var(--data);
+    font-size: var(--s-1);
+    color: var(--priced);
+    border-left: 2px solid var(--priced);
+    padding-left: 0.7rem;
+    max-width: 62ch;
+  }
+
+  .limits { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
+  .limit { background: var(--surface); padding: 1.1rem 1.2rem; display: flex; flex-direction: column; gap: 0.5rem; }
+  .limit p { font-size: var(--s-1); color: var(--ink-mid); }
+
+  .states { font-family: var(--data); font-size: var(--s-1); color: var(--refused); line-height: 1.9; word-spacing: 0.2em; }
+
+  footer { padding: 2.4rem 0 3.4rem; color: var(--ink-faint); font-size: var(--s-1); border-top: 1px solid var(--rule); }
+  footer p { max-width: var(--measure); }
+
+  @media (max-width: 40rem) {
+    table.data th, table.data td { padding: 0.45rem 0.6rem; }
+  }
+</style>
+
+<header class="masthead">
+  <div class="wrap">
+    <p class="eyebrow">CMS Physician Fee Schedule · CY2026 RVU26C</p>
+    <h1>What Medicare<br>actually allows.</h1>
+    <p class="lede">
+      A rate engine that computes the Medicare allowed amount for any CPT code,
+      in any locality, on any date of service — and shows the arithmetic that
+      produced it.
+    </p>
+
+    <div class="facts">
+      <div class="fact"><span class="k">Priceable lines</span><span class="num v">19,356</span></div>
+      <div class="fact"><span class="k">Localities</span><span class="num v">98</span></div>
+      <div class="fact"><span class="k">Conversion factor</span><span class="num v">33.4009</span></div>
+      <div class="fact"><span class="k">Tests</span><span class="num v accent">142</span></div>
+      <div class="fact"><span class="k">Invented rates</span><span class="num v accent">0</span></div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <section>
+    <div class="wrap stack-lg">
+      <div class="head">
+        <p class="eyebrow">The calculation</p>
+        <h2>Every figure is checkable</h2>
+        <p class="measure" style="color: var(--ink-mid)">
+          Medicare pays a code as the sum of three relative value units, each
+          adjusted by its own geographic index, multiplied by a conversion
+          factor. The three indices are not interchangeable — applying one to
+          the wrong component yields a plausible, wrong number. Here is CPT
+          99214, an established-patient office visit of moderate complexity,
+          in Alabama.
+        </p>
+      </div>
+
+      <div class="calc">
+        <table>
+          <tr>
+            <td class="label">Work</td>
+            <td class="n">1.92</td><td class="op">×</td><td class="n">1.000</td>
+            <td class="op">=</td><td class="n">1.9200</td>
+          </tr>
+          <tr>
+            <td class="label">Practice expense</td>
+            <td class="n">2.00</td><td class="op">×</td><td class="n">0.875</td>
+            <td class="op">=</td><td class="n">1.7500</td>
+          </tr>
+          <tr>
+            <td class="label">Malpractice</td>
+            <td class="n">0.14</td><td class="op">×</td><td class="n">0.566</td>
+            <td class="op">=</td><td class="n">0.0792</td>
+          </tr>
+          <tr class="sum">
+            <td class="label">Total RVU</td>
+            <td class="n"></td><td class="op"></td><td class="n"></td>
+            <td class="op"></td><td class="n">3.7492</td>
+          </tr>
+          <tr class="total">
+            <td class="label">× 33.4009</td>
+            <td class="n"></td><td class="op"></td><td class="n"></td>
+            <td class="op">=</td><td class="n">$125.23</td>
+          </tr>
+        </table>
+        <div class="prov">cms-pfs:2026-RVU26C:10112-AL-00 · DOS 2026-03-14 · non-facility</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap stack-lg">
+      <div class="head">
+        <p class="eyebrow">Geography</p>
+        <h2>The same code, five places</h2>
+        <p class="measure" style="color: var(--ink-mid)">
+          Geographic indices are the reason a national average is not a
+          benchmark. An office visit priced in Alabama and the same visit in
+          San Francisco differ by a third. Non-facility rates, date of service
+          14 March 2026.
+        </p>
+      </div>
+
+      <div class="scroll">
+        <table class="data">
+          <thead>
+            <tr>
+              <th>CPT</th><th class="desc" style="text-align:left">Service</th>
+              <th>Alabama</th><th>Wisconsin</th><th>Houston</th>
+              <th>Manhattan</th><th>San Francisco</th><th>Spread</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>99213</td><td class="desc">Office visit, established, low</td>
+              <td>$87.79</td><td>$90.84</td><td>$94.56</td><td>$114.29</td><td>$117.58</td>
+              <td>34%</td>
+            </tr>
+            <tr>
+              <td>99214</td><td class="desc">Office visit, established, moderate</td>
+              <td>$125.23</td><td>$129.44</td><td>$134.70</td><td>$162.22</td><td>$166.40</td>
+              <td>33%</td>
+            </tr>
+            <tr>
+              <td>99215</td><td class="desc">Office visit, established, high</td>
+              <td>$177.86</td><td>$183.68</td><td>$191.10</td><td>$229.49</td><td>$234.90</td>
+              <td>32%</td>
+            </tr>
+            <tr>
+              <td>71046</td><td class="desc">Chest X-ray, two views</td>
+              <td>$29.60</td><td>$31.14</td><td>$32.79</td><td>$41.77</td><td>$43.76</td>
+              <td>48%</td>
+            </tr>
+            <tr>
+              <td>93000</td><td class="desc">Electrocardiogram, complete</td>
+              <td>$13.95</td><td>$14.52</td><td>$15.24</td><td>$18.78</td><td>$19.22</td>
+              <td>38%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap stack-lg">
+      <div class="head">
+        <p class="eyebrow">A bill, priced</p>
+        <h2>Four priced, four refused</h2>
+        <p class="measure" style="color: var(--ink-mid)">
+          Billed lines in, benchmarked lines out. A line with no defensible
+          benchmark says so and contributes nothing to any total — the
+          alternative is a plausible number reaching a demand letter. This is
+          the actual output of the shipped example.
+        </p>
+      </div>
+
+      <div class="scroll">
+        <table class="data">
+          <thead>
+            <tr>
+              <th>Line</th><th>Code</th><th class="desc" style="text-align:left">Service</th>
+              <th>Charged</th><th>Medicare</th><th>Variance</th><th>×</th>
+              <th style="text-align:left">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>2</td><td>99214</td><td class="desc">Office visit, moderate</td>
+              <td>$340.00</td><td>$125.23</td><td class="flag">$214.77</td><td class="flag">2.72</td>
+              <td style="text-align:left"><span class="pill ok">priced</span></td>
+            </tr>
+            <tr>
+              <td>3</td><td>99213</td><td class="desc">Office visit, low</td>
+              <td>$210.00</td><td>$87.79</td><td class="flag">$122.21</td><td class="flag">2.39</td>
+              <td style="text-align:left"><span class="pill ok">priced</span></td>
+            </tr>
+            <tr>
+              <td>4</td><td>71046-26</td><td class="desc">Chest X-ray, professional read only</td>
+              <td>$185.00</td><td>$9.54</td><td class="flag">$175.46</td><td class="flag">19.39</td>
+              <td style="text-align:left"><span class="pill ok">priced</span></td>
+            </tr>
+            <tr>
+              <td>5</td><td>80053</td><td class="desc">Metabolic panel — statutory exclusion</td>
+              <td>$95.00</td><td>—</td><td>—</td><td>—</td>
+              <td style="text-align:left"><span class="pill no">no benchmark</span></td>
+            </tr>
+            <tr>
+              <td>6</td><td>27215</td><td class="desc">Pelvic fracture treatment — status I, not valid</td>
+              <td>$1,450.00</td><td>—</td><td>—</td><td>—</td>
+              <td style="text-align:left"><span class="pill no">no benchmark</span></td>
+            </tr>
+            <tr>
+              <td>7</td><td>99215</td><td class="desc">Office visit, high — explicit locality</td>
+              <td>$520.00</td><td>$234.90</td><td class="flag">$285.10</td><td class="flag">2.21</td>
+              <td style="text-align:left"><span class="pill ok">priced</span></td>
+            </tr>
+            <tr>
+              <td>8</td><td>99999</td><td class="desc">Not in the RVU file</td>
+              <td>$300.00</td><td>—</td><td>—</td><td>—</td>
+              <td style="text-align:left"><span class="pill no">no benchmark</span></td>
+            </tr>
+            <tr>
+              <td>9</td><td>99214</td><td class="desc">California — 20 localities, state alone insufficient</td>
+              <td>$395.00</td><td>—</td><td>—</td><td>—</td>
+              <td style="text-align:left"><span class="pill no">no benchmark</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="facts">
+        <div class="fact"><span class="k">Charged, all lines</span><span class="num v">$3,495.00</span></div>
+        <div class="fact"><span class="k">Charged, priced only</span><span class="num v">$1,255.00</span></div>
+        <div class="fact"><span class="k">Medicare allowed</span><span class="num v">$457.46</span></div>
+        <div class="fact"><span class="k">Variance</span><span class="num v accent">$797.54</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap stack-lg">
+      <div class="head">
+        <p class="eyebrow">What the real files broke</p>
+        <h2>Every one of these produced a plausible wrong number</h2>
+        <p class="measure" style="color: var(--ink-mid)">
+          None of these appeared against synthetic fixtures. Each surfaced only
+          when an actual CMS release was loaded, and each would have shipped a
+          confident, defensible-looking figure that was wrong.
+        </p>
+      </div>
+
+      <div class="findings">
+        <article class="finding">
+          <div class="what">A CPT code is not unique</div>
+          <p>
+            Imaging appears three times — global, professional component
+            <code>-26</code>, technical component <code>TC</code> — each with
+            different RVUs. The CY2026 release carries 2,261 such rows. Keyed on
+            the code alone they read as conflicting duplicates.
+          </p>
+          <p class="caught">The whole 19,356-line file was refused on first load. Keyed on code + modifier it now loads, and a professional read prices at $9.54 rather than the $29.60 global service.</p>
+        </article>
+
+        <article class="finding">
+          <div class="what">MAC plus locality is not unique either</div>
+          <p>
+            Contractor 05102 serves both Connecticut and Iowa, each as locality
+            <code>00</code>, with practice-expense indices of 1.122 and 0.900.
+            Contractor 03502 does the same for South Dakota and Utah.
+          </p>
+          <p class="caught">Silently keeping one would have priced Connecticut with Iowa's indices — roughly 20% off on the practice-expense component of every line in the state. The loader refused instead, which is how it was found.</p>
+        </article>
+
+        <article class="finding">
+          <div class="what">Status governs pricing, not the presence of RVUs</div>
+          <p>
+            158 non-priceable rows carry real relative value units. CPT 27215
+            has a work RVU of 10.19 under status <code>I</code>, "not valid for
+            Medicare purposes."
+          </p>
+          <p class="caught">Computed rather than refused, that line yields a substantial benchmark for a service Medicare does not pay under this schedule. Only statuses A, R and T are priced.</p>
+        </article>
+
+        <article class="finding">
+          <div class="what">The header row moves between releases</div>
+          <p>
+            The full July release carries nine banner rows; an excerpt of the
+            same file carried eight. A fixed offset reads a banner as the header
+            and every column resolves one row late.
+          </p>
+          <p class="caught">Layouts now locate the header by its first cell. Column positions are proved independently by reconciling parsed components against CMS's own published totals.</p>
+        </article>
+
+        <article class="finding">
+          <div class="what">A rounded ratio hid a threshold</div>
+          <p>
+            A charge at 1.504× the benchmark displayed as 1.50 and slipped
+            under a 1.5× flag.
+          </p>
+          <p class="caught">The comparison now uses the exact ratio and rounds only for display.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap stack-lg">
+      <div class="head">
+        <p class="eyebrow">Coverage and limits</p>
+        <h2>Where this is not the right benchmark</h2>
+      </div>
+
+      <div class="limits">
+        <div class="limit">
+          <h3>36 of 53 states resolve from the state alone</h3>
+          <p>
+            They contain exactly one locality. CMS does not reliably publish
+            the ZIP-to-locality crosswalk, so the remaining 17 need an explicit
+            locality or a crosswalk.
+          </p>
+          <p class="states">CA · FL · GA · IL · LA · MA · MD · ME · MI · MO · NJ · NY · OR · PA · TX · WA · WV</p>
+        </div>
+        <div class="limit">
+          <h3>Professional services only</h3>
+          <p>
+            Hospital facility charges price under OPPS for outpatient and DRGs
+            for inpatient — different systems entirely. Comparing a facility
+            line to the physician fee schedule is the wrong benchmark, and this
+            engine will not pretend otherwise.
+          </p>
+        </div>
+        <div class="limit">
+          <h3>One schedule year loaded</h3>
+          <p>
+            CY2026. A rate is only defensible for a date of service the loaded
+            release covers — an appeal on a 2024 bill needs the 2024 schedule.
+            Overlapping periods are rejected outright rather than resolved by
+            guessing.
+          </p>
+        </div>
+        <div class="limit">
+          <h3>Nothing is estimated</h3>
+          <p>
+            There is no default rate anywhere in the engine. Every failure names
+            its own reason: unknown code, unmapped ZIP, ambiguous state, not
+            priceable, no schedule for that date, missing practice-expense RVU.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="wrap">
+  <p>
+    Figures are Medicare allowed amounts computed from CMS published RVU, GPCI
+    and conversion-factor data for CY2026 RVU26C. They are benchmarks, not a
+    determination of what is owed, and nothing here is legal or medical advice.
+    All figures on this page are produced by the engine and reproducible from
+    the committed data.
+  </p>
+</footer>

@@ -57,7 +57,23 @@ covered). Add OPPS only when firms say it's the blocker.
 Unresolved from the business doc: the 2% success fee may run into
 fee-splitting rules in CA, TX and FL. Worth a lawyer's read before pricing it.
 
-## Next step
+## Where it got to
 
-Load the three CMS files. Everything after that — bulk CSV input, a
-case-file-ready output — follows from having real rates.
+Real Medicare rates, computed from the complete CY2026 RVU26C release:
+**19,356 priceable lines, 98 localities, conversion factor 33.4009** read from
+the file. 142 tests, warnings as errors, zero unexpected drift.
+
+- `pfs/` — the engine: formula, lookup, loaders, locality resolution, bulk pricing
+- `tools/price_bill.py` — billed lines in, benchmarked lines with derivations out
+- `layouts/`, `policy/` — CMS column layouts and business thresholds, as data
+- `evidence/` — a self-hashed artifact and frozen baseline per phase
+- `.claude/skills/medicare-rates/` — the skill for picking this up later
+- `docs/rate_engine_dossier.html` — the published dossier
+
+## Next steps
+
+1. **The 17 ambiguous states** need a ZIP-to-locality crosswalk or an explicit
+   locality: CA, FL, GA, IL, LA, MA, MD, ME, MI, MO, NJ, NY, OR, PA, TX, WA, WV.
+2. **OPPS and DRG** for hospital facility charges — a different pricing system,
+   real new work, and the thing PI bills will demand.
+3. **Point BILLROSETTA at this engine**, replacing its hardcoded table.
