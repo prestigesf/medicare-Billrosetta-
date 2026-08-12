@@ -1,0 +1,12 @@
+{
+  "_status": "UNVERIFIED — candidate column names for GPCI2026. Loader reports actual headers on mismatch.",
+  "_source_file": "GPCI2026.csv",
+  "skip_rows": 0,
+  "fields": {
+    "locality_id": "LOCALITY",
+    "locality_name": "LOCALITY NAME",
+    "work": "PW GPCI",
+    "practice_expense": "PE GPCI",
+    "malpractice": "MP GPCI"
+  }
+}

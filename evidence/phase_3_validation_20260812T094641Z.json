@@ -1,0 +1,50 @@
+{
+  "payload": {
+    "dependencies": {
+      "Pygments": "2.20.0",
+      "et_xmlfile": "2.0.0",
+      "iniconfig": "2.3.0",
+      "openpyxl": "3.1.5",
+      "packaging": "26.3",
+      "pluggy": "1.6.0",
+      "pytest": "9.1.1"
+    },
+    "git_commit": "fa05e86e706183914ecc30caa6db601211fe7af9",
+    "overall_status": "PASS",
+    "phase": "3",
+    "raw_output_file": "evidence/phase3_raw_test_output.txt",
+    "raw_output_sha256": "053b2f7670063f19ca0766defead9acfe9ac8ccb4ea1298574bcdb8c5366bc7f",
+    "runtime": {
+      "implementation": "CPython",
+      "platform": "Linux-6.18.5-fc-v20-x86_64-with-glibc2.39",
+      "python": "3.11.15"
+    },
+    "source_file_sha256": {
+      "README.md": "4bae6f105ac06d52feaf28202f84c6c6f8544fc2bed0120321ad43b17d14b8cf",
+      "pfs/__init__.py": "77e6da02c637778e3a2b422620505772aa866cefdaa6192895ad28f1fb4c60be",
+      "pfs/engine.py": "37336016c20d9b1fe1983077df6133a3c80e7a093044162eb12561dc80e6fd68",
+      "pfs/errors.py": "e6e6c526fd6aa3f83f533f67cc2cc38224247469080cf7143981c9fe807259eb",
+      "pfs/formula.py": "90a1f8dd8715751ade4dcc41b8695774f25e5b7c20c24936c2d46924a5a4ff43",
+      "pfs/loaders.py": "e1e4d40ef303b8dd42d57287a8c4fe0a78de45b8e471206f8bcb509d146a0a2b",
+      "pfs/models.py": "62e21127b52fc7deb3167043e9b70a5449a86663bc506b483f29691e33a13fc6",
+      "pyproject.toml": "e6b96a222f96b8c5ba4d1c22d5be96dd3753e60979c84dbd691aa3b3160db604",
+      "tests/test_engine.py": "38212cfa0ef86ec433b586ac457e403300bd6b4551891d72bcf47b407015d8f5",
+      "tests/test_formula.py": "83f9ea4b01460e14d327462a25ac672d1a5a4f85622b1abe5bd8b73e19611a85",
+      "tests/test_invariants.py": "9e20a973ffe278cfbb0f3f6059035cee128767c398ec974bbe09a5790c3a4d26",
+      "tests/test_loaders.py": "dc2177d5010d1bb40b037c1f9da2afc2d750df1987886f26c468f54055f082f5",
+      "tests/test_xlsx_and_layouts.py": "abe5dc913ae694be91e0e0794cc2c1a97a21e928d861ae657ec0ded2af921505",
+      "tools/make_evidence.py": "d09dcacb44967bc4d1da476729afe5b54760ed390a7f82ac001989285500e2a6",
+      "tools/phase_diff.py": "75f3266f3354d080b187e7364433ed294893580031a655601eee635224b39981"
+    },
+    "test_command": "python -m pytest -v -W error",
+    "test_counts": {
+      "error": "0",
+      "failed": "0",
+      "passed": "75",
+      "skipped": "0"
+    },
+    "test_exit_code": "0",
+    "timestamp_utc": "20260812T094641Z"
+  },
+  "payload_sha256": "e27d80babe031694d1505288dbb6957f55358dcf10ac0126cd67c99e007c9c4a"
+}

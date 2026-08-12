@@ -15,6 +15,7 @@ with its line number and rejected. Nothing is silently coerced or defaulted,
 because a bad rate that loads quietly is worse than a file that refuses.
 """
 import csv
+import json
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Iterator, List, Optional, Sequence, Tuple, Union
@@ -45,24 +46,120 @@ class FileFormatError(Exception):
 class ColumnMap:
     """Where each field lives in a particular file.
 
-    fields: field name -> header name (CSV) or (start, end) slice (fixed width)
+    fields: field name -> header name (delimited/xlsx) or (start, end) slice
     fixed_width: read by character offsets rather than delimiter
-    skip_rows: leading rows to discard (banners, notes, blank lines)
+    skip_rows: leading rows to discard — CMS files carry several banner and
+        copyright rows before the real header
+    sheet: worksheet name for xlsx; None takes the active sheet
     """
 
     fields: Dict[str, FieldSpec]
     fixed_width: bool = False
     skip_rows: int = 0
     encoding: str = "utf-8-sig"
+    sheet: Optional[str] = None
 
     def require(self, *names: str) -> None:
         missing = [n for n in names if n not in self.fields]
         if missing:
             raise ValueError(f"ColumnMap is missing required field(s): {missing}")
 
+    @classmethod
+    def from_json(cls, path: Union[str, Path]) -> "ColumnMap":
+        """Load a layout from a JSON file.
+
+        Layouts are data, so adopting a new CMS release means editing JSON, not
+        Python. Fixed-width offsets are written as two-element lists.
+        """
+        spec = json.loads(Path(path).read_text())
+        fields = {
+            name: tuple(value) if isinstance(value, list) else value
+            for name, value in spec["fields"].items()
+        }
+        return cls(
+            fields=fields,
+            fixed_width=spec.get("fixed_width", False),
+            skip_rows=spec.get("skip_rows", 0),
+            encoding=spec.get("encoding", "utf-8-sig"),
+            sheet=spec.get("sheet"),
+        )
+
+
+def _match_headers(path: Path, available: Sequence[str], colmap: ColumnMap) -> Dict[str, str]:
+    """Resolve mapped column names against the file's actual headers.
+
+    Compares case-insensitively with collapsed whitespace, because CMS headers
+    vary in capitalisation and internal spacing between releases. An unmatched
+    column is fatal and reports what the file actually contains.
+    """
+    def key(text: str) -> str:
+        return " ".join(str(text).split()).upper()
+
+    lookup = {key(h): h for h in available if h is not None and str(h).strip()}
+    resolved, missing = {}, []
+    for name, spec in colmap.fields.items():
+        actual = lookup.get(key(spec))
+        if actual is None:
+            missing.append(spec)
+        else:
+            resolved[name] = actual
+
+    if missing:
+        raise FileFormatError(
+            path,
+            [f"column {c!r} not in file; available: {sorted(lookup.values())}" for c in missing],
+        )
+    return resolved
+
+
+def _xlsx_rows(path: Path, colmap: ColumnMap) -> Iterator[Tuple[int, Dict[str, str]]]:
+    """Yield rows from a spreadsheet.
+
+    read_only mode holds an open file handle, and a generator can be abandoned
+    part-way — by an exception on a bad column, or by a caller that stops
+    iterating. The workbook is closed in a finally block so the handle is
+    released on every exit path, not just the happy one.
+    """
+    from openpyxl import load_workbook
+
+    book = load_workbook(path, read_only=True, data_only=True)
+    rows = None
+    try:
+        sheet = book[colmap.sheet] if colmap.sheet else book.active
+
+        rows = sheet.iter_rows(values_only=True)
+        for _ in range(colmap.skip_rows):
+            next(rows, None)
+
+        header = next(rows, None)
+        if header is None:
+            raise FileFormatError(path, ["no header row found after skip_rows"])
+
+        resolved = _match_headers(path, [str(h) if h is not None else "" for h in header], colmap)
+        index = {str(h) if h is not None else "": i for i, h in enumerate(header)}
+
+        for offset, row in enumerate(rows, start=colmap.skip_rows + 2):
+            if all(cell is None or str(cell).strip() == "" for cell in row):
+                continue
+            yield offset, {
+                name: ("" if row[index[actual]] is None else str(row[index[actual]]).strip())
+                for name, actual in resolved.items()
+            }
+    finally:
+        # The row iterator holds its own handle into the zip archive. Closing
+        # the workbook alone leaves that one open when iteration is abandoned
+        # part-way, e.g. by a bad-column error after the header is read.
+        if rows is not None:
+            rows.close()
+        book.close()
+
 
 def _rows(path: Path, colmap: ColumnMap) -> Iterator[Tuple[int, Dict[str, str]]]:
     """Yield (line number, {field: raw text}) for each data row."""
+    if path.suffix.lower() in (".xlsx", ".xlsm"):
+        yield from _xlsx_rows(path, colmap)
+        return
+
     text = path.read_text(encoding=colmap.encoding)
     lines = text.splitlines()[colmap.skip_rows:]
 
@@ -80,18 +177,12 @@ def _rows(path: Path, colmap: ColumnMap) -> Iterator[Tuple[int, Dict[str, str]]]
     if reader.fieldnames is None:
         raise FileFormatError(path, ["file has no header row"])
 
-    headers = {h.strip(): h for h in reader.fieldnames if h is not None}
-    unknown = [spec for spec in colmap.fields.values() if spec not in headers]
-    if unknown:
-        raise FileFormatError(
-            path,
-            [f"column {c!r} not in file; available: {sorted(headers)}" for c in unknown],
-        )
+    resolved = _match_headers(path, reader.fieldnames, colmap)
 
     for offset, row in enumerate(reader, start=colmap.skip_rows + 2):
         yield offset, {
-            name: (row.get(headers[spec]) or "").strip()
-            for name, spec in colmap.fields.items()
+            name: (row.get(actual) or "").strip()
+            for name, actual in resolved.items()
         }
 
 
