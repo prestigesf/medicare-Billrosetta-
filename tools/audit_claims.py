@@ -16,6 +16,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from pfs import FeeSchedulePeriod, RateEngine  # noqa: E402
 from pfs.audit import audit_claims, read_claims  # noqa: E402
+from pfs.ledger import SourceRecord, record_audit, sha256_file  # noqa: E402
 from pfs.loaders import (  # noqa: E402
     ColumnMap, load_conversion_factor, load_gpcis, load_rvus,
 )
@@ -23,6 +24,7 @@ from pfs.locality import LocalityDirectory  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data" / "cms" / "rvu26c"
+PERIOD_ID = "2026-RVU26C"
 LAYOUTS = ROOT / "layouts"
 
 TEAL, RUST, GREEN, DIM, BOLD, R = (
@@ -122,6 +124,37 @@ def main() -> int:
           f"unmeasured,{R}")
     print(f"  {DIM}and most of them need OPPS or DRG pricing rather than the "
           f"physician schedule.{R}\n")
+
+    # The ledger is the thing that outlives the report.
+    ledger = record_audit(
+        audit,
+        sources=[
+            SourceRecord("claims extract", "input", claims_path.name,
+                         sha256_file(claims_path)),
+            SourceRecord("PPRRVU", "cms-file", (DATA / "PPRRVU2026_Jul_nonQPP.csv").name,
+                         sha256_file(DATA / "PPRRVU2026_Jul_nonQPP.csv")),
+            SourceRecord("GPCI", "cms-file", (DATA / "GPCI2026.csv").name,
+                         sha256_file(DATA / "GPCI2026.csv")),
+        ],
+        parameters={"schedule": PERIOD_ID, "lines": str(summary["lines"])},
+    )
+    ledger_path = claims_path.with_name(claims_path.stem + "_ledger.json")
+    ledger.write(ledger_path)
+    check = ledger.verify()
+
+    rule()
+    print(f"{BOLD}AUDIT LEDGER{R}")
+    rule()
+    print(f"  run           {ledger.run_id}")
+    print(f"  entries       {check['entries']} chained")
+    print(f"  head          {ledger.head[:32]}…")
+    print(f"  integrity     {GREEN if check['intact'] else RUST}"
+          f"{'VERIFIED — chain intact' if check['intact'] else check['detail']}{R}")
+    print(f"  written       {ledger_path.name}")
+    print(f"  {DIM}Claim identifiers are stored as salted digests. Altering any "
+          f"line breaks{R}")
+    print(f"  {DIM}every hash after it, which is what makes this evidence rather "
+          f"than a report.{R}\n")
 
     rule("═")
     print(f"{DIM}  Medicare allowed amounts computed from CMS published data. "
