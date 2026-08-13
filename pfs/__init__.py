@@ -18,6 +18,17 @@ from .errors import (
 )
 from .formula import compute_allowed_amount, round_money
 from .locality import AmbiguousLocality, LocalityDirectory, UnknownState
+from .opps import (
+    APCAssignment,
+    NoAddendumForDate,
+    NotPayableUnderOPPS,
+    OPPSEngine,
+    OPPSPeriod,
+    OPPSResult,
+    UnknownHCPCS,
+    UnknownWageIndex,
+    WageIndex,
+)
 from .models import (
     rvu_key,
     GPCI,
