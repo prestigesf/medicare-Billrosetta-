@@ -76,8 +76,17 @@ def numeric_literals(path: Path, *, skip_named_constants: bool = False):
 
 @pytest.mark.parametrize("path", engine_sources(), ids=lambda p: p.name)
 def test_no_float_literals_in_engine_source(path):
-    """Rates, GPCIs and conversion factors are floats. None may be hardcoded."""
-    floats = [(line, value) for line, value in numeric_literals(path) if isinstance(value, float)]
+    """Rates, GPCIs and conversion factors are floats. None may be hardcoded.
+
+    Exactly 0.0 is permitted: it is the identity used to start an accumulator
+    or return an empty total, and no CMS value is ever zero — a rate, an index
+    and a conversion factor are all strictly positive. Any other float is
+    rejected regardless of how it is named.
+    """
+    floats = [
+        (line, value) for line, value in numeric_literals(path)
+        if isinstance(value, float) and value != 0.0
+    ]
     assert not floats, (
         f"{path.name} contains float literal(s) in executable code: {floats}. "
         "Rates, GPCIs and conversion factors must come from CMS data, not source."
@@ -149,3 +158,21 @@ def test_the_check_would_actually_catch_a_hardcoded_rate(tmp_path):
 
     floats = [v for _, v in numeric_literals(planted) if isinstance(v, float)]
     assert floats == [110.50], "the AST check failed to see a planted rate"
+
+
+def test_a_nonzero_float_is_still_caught_however_it_is_written(tmp_path):
+    """The 0.0 allowance must not become a doorway for a real rate."""
+    planted = tmp_path / "planted.py"
+    planted.write_text(
+        "ZERO = 0.0\n"
+        "TOTAL = 0.0\n"
+        "SNEAKY_RATE = 110.50\n"
+        "def f():\n"
+        "    return 33.4009\n"
+    )
+
+    offending = [
+        v for _, v in numeric_literals(planted)
+        if isinstance(v, float) and v != 0.0
+    ]
+    assert sorted(offending) == [33.4009, 110.50]

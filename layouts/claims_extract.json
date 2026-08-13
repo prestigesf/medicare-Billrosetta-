@@ -1,0 +1,15 @@
+{
+  "_note": "A TPA claims extract. Column names differ by vendor, so the mapping is configuration exactly as it is for the CMS files. Only cpt_code, service_date and paid_amount are required.",
+  "fields": {
+    "claim_id": "claim_id",
+    "provider": "provider",
+    "cpt_code": "cpt",
+    "modifier": "mod",
+    "units": "units",
+    "service_date": "dos",
+    "billed_amount": "billed",
+    "paid_amount": "paid",
+    "revenue_code": "rev_code",
+    "locality_id": "locality"
+  }
+}
