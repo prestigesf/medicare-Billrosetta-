@@ -48,6 +48,8 @@ INDICATOR_MEANINGS = {
     "Q1": "conditionally packaged — paid separately only when billed alone",
     "Q2": "conditionally packaged — paid separately only when billed alone",
     "Q3": "may be paid through a composite APC",
+    "Q4": ("conditionally packaged laboratory test — paid under the clinical "
+           "laboratory fee schedule when billed alone, packaged otherwise"),
     "E1": "not payable by Medicare",
     "E2": "not payable under OPPS when submitted on an outpatient claim",
     "B": "not appropriate for billing under OPPS",

@@ -1,0 +1,12 @@
+{
+  "_source_file": "July2026_Addendum_B.csv — OPPS Payment by HCPCS Code, CY2026",
+  "_note": "Verified against the real July 2026 release. The file carries no modifier column, so codes are keyed on HCPCS alone. Banner and copyright rows precede the header, and their count varies between quarters, so the header is located by its first cell rather than a fixed offset.",
+  "header_starts_with": "HCPCS Code",
+  "fields": {
+    "hcpcs": "HCPCS Code",
+    "description": "Short Descriptor",
+    "status_indicator": "SI",
+    "apc": "APC",
+    "national_rate": "Payment Rate"
+  }
+}

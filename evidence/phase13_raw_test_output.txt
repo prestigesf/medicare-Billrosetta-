@@ -199,4 +199,4 @@ tests/test_xlsx_and_layouts.py::test_column_map_round_trips_through_json PASSED 
 tests/test_xlsx_and_layouts.py::test_json_layout_supports_fixed_width_offsets PASSED [ 99%]
 tests/test_xlsx_and_layouts.py::test_shipped_layouts_are_wellformed PASSED [100%]
 
-============================= 192 passed in 2.55s ==============================
+============================= 192 passed in 2.38s ==============================
