@@ -1,0 +1,3 @@
+FIXTURE ONLY. Not an assignment of Medicare benefits.
+This file exists so the titled math path can be tested.
+Do not present it to an underwriter as title.
