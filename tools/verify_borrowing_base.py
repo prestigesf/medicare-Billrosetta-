@@ -146,7 +146,9 @@ def verify_packet(packet_path, pprrvu_csv, gpci_csv, pprrvu_layout, gpci_layout)
                 + expected_pe * g_entry.practice_expense
                 + r_entry.malpractice * g_entry.malpractice
             )
-            disk_allowed = round(tot * disk_cf, 2)
+            unit_allowed = round(tot * disk_cf, 2)
+            units = float(p.get("units") or 1)
+            disk_allowed = round(unit_allowed * units, 2)
         else:
             disk_allowed = 0.0
 
