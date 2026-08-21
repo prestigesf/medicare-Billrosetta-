@@ -1,0 +1,131 @@
+{
+  "packet_id": "BB-2026-Q1-001",
+  "fixture_mode": "EXCERPT_PREVIEW",
+  "provider_npi": "1982736450",
+  "mac_jurisdiction": "Noridian_01112_CA_05",
+  "engine_binding": {
+    "pfs_release": "RVU26C",
+    "conversion_factor": 33.4009,
+    "rvu_data_hash": "9c298667e54556a6c09e84e511aabfe7a90ec7f44bfb321bbc06973a00b36033"
+  },
+  "eligibility_attestation": {
+    "title_assigned": true,
+    "assignment_doc_hash": "d2a3f811bc2e841793540b938192a0e417849182309182093847102938471029",
+    "timely_filing_verified": true,
+    "no_recoupment_block": true
+  },
+  "claim_lines": [
+    {
+      "line_id": "CLM-001",
+      "claim_control_number": "CCN-2026-8819201",
+      "source_doc_hash": "a1f87c9b32e14850d99a4e21b7f09312d8a43217b120f4c39871ab93450912ef",
+      "dos": "2026-06-12",
+      "cpt_hcpcs": "43239",
+      "modifiers": [],
+      "pos": "11",
+      "locality_id": "01112-CA-05",
+      "billed_amount": 1200.0,
+      "bucket": "BUCKET_A_FILED_MEDICARE_AR",
+      "engine_pricing": {
+        "work_rvu": 2.33,
+        "pe_rvu": 9.94,
+        "mp_rvu": 0.27,
+        "gpci_work": 1.095,
+        "gpci_pe": 1.41,
+        "gpci_mp": 0.425,
+        "allowed_amount": 557.18,
+        "derivation": "(2.33 * 1.095 + 9.94 * 1.410 + 0.27 * 0.425) * 33.4009 = 557.18"
+      },
+      "exclusion_flags": [],
+      "inclusion_verdict": "ELIGIBLE_AR",
+      "line_receipt_hash": "7b9b15a9ddcd5b431184280ae8d4d614209335d81802e8473d1ae8ed79ee9677"
+    },
+    {
+      "line_id": "CLM-002",
+      "claim_control_number": "CCN-2026-8819202",
+      "source_doc_hash": "b2c7e8192a014918230918209384710293847102938471029384710293847102",
+      "dos": "2026-06-12",
+      "cpt_hcpcs": "99214",
+      "modifiers": [],
+      "pos": "11",
+      "locality_id": "01112-CA-05",
+      "billed_amount": 350.0,
+      "bucket": "BUCKET_A_FILED_MEDICARE_AR",
+      "engine_pricing": {
+        "work_rvu": 1.92,
+        "pe_rvu": 2.0,
+        "mp_rvu": 0.14,
+        "gpci_work": 1.095,
+        "gpci_pe": 1.41,
+        "gpci_mp": 0.425,
+        "allowed_amount": 166.4,
+        "derivation": "(1.92 * 1.095 + 2.00 * 1.410 + 0.14 * 0.425) * 33.4009 = 166.40"
+      },
+      "exclusion_flags": [],
+      "inclusion_verdict": "ELIGIBLE_AR",
+      "line_receipt_hash": "e8c59a96817eef23256ce7692dc77a57abad5cc0486baa5ef79289060b1149d7"
+    },
+    {
+      "line_id": "CLM-003",
+      "claim_control_number": "CCN-2026-8819203",
+      "source_doc_hash": "c493821048123984019283019283019283019283019283019283019283019283",
+      "dos": "2026-06-13",
+      "cpt_hcpcs": "G0438",
+      "modifiers": [],
+      "pos": "11",
+      "locality_id": "01112-CA-05",
+      "billed_amount": 450.0,
+      "bucket": "BUCKET_B_PATIENT_RESPONSIBILITY",
+      "engine_pricing": {
+        "work_rvu": 2.6,
+        "pe_rvu": 2.45,
+        "mp_rvu": 0.17,
+        "gpci_work": 1.095,
+        "gpci_pe": 1.41,
+        "gpci_mp": 0.425,
+        "allowed_amount": 212.89,
+        "derivation": "(2.60 * 1.095 + 2.45 * 1.410 + 0.17 * 0.425) * 33.4009 = 212.89"
+      },
+      "exclusion_flags": [],
+      "inclusion_verdict": "REJECTED_EXCLUDED",
+      "line_receipt_hash": "059196c3bb06b8803cf33eab0a415a90f56216dc59cf77dd2347c3478983cb71"
+    },
+    {
+      "line_id": "CLM-004",
+      "claim_control_number": "CCN-2026-8819204",
+      "source_doc_hash": "e938102938102938102938102938102938102938102938102938102938102938",
+      "dos": "2026-06-14",
+      "cpt_hcpcs": "36415",
+      "modifiers": [],
+      "pos": "11",
+      "locality_id": "01112-CA-05",
+      "billed_amount": 450.0,
+      "bucket": "BUCKET_E_UNPRICEABLE_EXCLUDED",
+      "engine_pricing": {
+        "work_rvu": 0.0,
+        "pe_rvu": 0.0,
+        "mp_rvu": 0.0,
+        "gpci_work": 1.095,
+        "gpci_pe": 1.41,
+        "gpci_mp": 0.425,
+        "allowed_amount": 0.0,
+        "derivation": "STATUS_X_STATUTORY_EXCLUSION = 0.00"
+      },
+      "exclusion_flags": [
+        "STATUS_X_STATUTORY_EXCLUSION"
+      ],
+      "inclusion_verdict": "REJECTED_EXCLUDED",
+      "line_receipt_hash": "474b381e295ebee18490880f63f8b6f8660c368dc857cb829386fc56bd8e025d"
+    }
+  ],
+  "rollup": {
+    "total_face_billed": 2450.0,
+    "eligible_ar_allowed": 723.58,
+    "haircuts_total": 1726.42,
+    "net_borrowing_base": 723.58,
+    "advance_rate_pct": 76.6,
+    "advance_amount_t0": 554.26,
+    "reserve_amount": 169.32
+  },
+  "packet_digest": "0xcb9b8f183927cc655c3791c05e215f9eeda950e162d544200d6b8b5e01c012c7"
+}
