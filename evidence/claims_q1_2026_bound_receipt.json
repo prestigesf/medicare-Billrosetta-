@@ -1,0 +1,37 @@
+{
+  "packet_id": "BB-2026-Q1-BOOK",
+  "fixture_mode": "PRODUCTION_BOOK",
+  "note": "Specimen assignment only. Not a live title instrument. Same CMS files as unbound $0 book.",
+  "mac_jurisdiction": "10112-AL-00",
+  "engine_binding": {
+    "pfs_release": "RVU26C",
+    "conversion_factor": 33.4009,
+    "rvu_data_hash": "9c298667e54556a6c09e84e511aabfe7a90ec7f44bfb321bbc06973a00b36033",
+    "pprrvu_sha256": "b7d197e73211ef6854c213c267d5fa9dec8df995db8e1ee7d44c0556ad7cee21",
+    "gpci_sha256": "2a70b4fbdb2bdfcb91454194b7b40c7e60e530b9732c5156e5cb203da6b51d1d"
+  },
+  "eligibility_attestation": {
+    "title_assigned": true,
+    "assignment_doc_hash": "0db801d59a907977dfa6db05a56f3566beac1bb30590c70a1055ec77474cc173",
+    "assignment_path": "evidence/docs/provider_assignment_specimen_sanitized.txt",
+    "timely_filing_verified": false,
+    "no_recoupment_block": false
+  },
+  "claims_extract_sha256": "fc6d8b09b5a50866427d1406b791da8ed22e7ab0ed1e37729a1065d1d9140d29",
+  "line_summary": {
+    "total_lines_processed": 260,
+    "eligible_ar_lines": 236,
+    "status_x_excluded_lines": 24,
+    "modifier_26_split_lines": 48
+  },
+  "rollup": {
+    "total_face_billed": 467518.99,
+    "eligible_ar_allowed": 35601.32,
+    "haircuts_total": 431917.67,
+    "net_borrowing_base": 35601.32,
+    "advance_rate_pct": 76.6,
+    "advance_amount_t0": 27270.61,
+    "reserve_amount": 8330.71
+  },
+  "packet_digest": "0x13e5a11a6ba8d8c61c9abd461992d710a71a1ddccdfc9dc3c6883eb7a1ee3cf0"
+}

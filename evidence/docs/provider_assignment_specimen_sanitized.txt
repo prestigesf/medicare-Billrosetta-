@@ -1,0 +1,32 @@
+================================================================================
+FORM OF RECEIVABLES ASSIGNMENT & SECURITY AGREEMENT (SPECIMEN / SANITIZED)
+================================================================================
+Document Reference: ASSIGN-2026-Q1-SAN-001
+Effective Date: 2026-06-01
+
+1. PARTIES:
+   - Assignor: [SANITIZED CLINICAL ENTITY LLC] (NPI: 1982736450)
+   - Assignee: [VENTUREPILOT RECEIVABLES SPV LLC] (EIN: XX-XXXXXXX)
+   - Servicing MAC: Noridian Healthcare Solutions (Jurisdiction 01112 / CA)
+
+2. ASSIGNMENT OF RECEIVABLES:
+   Assignor hereby unconditionally sells, transfers, assigns, and conveys to
+   Assignee all legal title, equitable rights, and beneficial interests in all
+   Medicare Part B claims, electronic remittance advices (835/ERA), and
+   associated receivables originated during Q1/Q2 2026, including the schedule
+   of claims bound under Claims Schedule Hash:
+   SCHEDULE_DIGEST: SEE_SHA256_OF_examples/claims_q1_2026.csv
+
+3. ATTESTATION & POWER OF ATTORNEY:
+   Assignor warrants good and marketable title free of existing liens, encumbrances,
+   or active Medicare offset/recoupment holds. Assignor grants Assignee full power
+   to receive, endorse, and deposit payments issued under CMS-1500 / 837P filings.
+
+THIS IS A SANITIZED SPECIMEN FOR PIPELINE TESTING. IT IS NOT A LIVE ASSIGNMENT
+OF MEDICARE BENEFITS AND CREATES NO LEGAL RIGHTS.
+
+IN WITNESS WHEREOF, the parties execute this specimen assignment as of the date above.
+
+Assignor Authorized Signature:  [ELECTRONICALLY SIGNED / SANITIZED]
+Assignee Authorized Signature:  [ELECTRONICALLY SIGNED / SANITIZED]
+================================================================================
